@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Yönetimi - Home Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/Css/kullanici-yonetimi.css">
+    <link rel="icon" href="/İmages/logo.png" type="image/png">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header glass-panel">
+            <div class="header-left">
+                <a href="/index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+                <h1 class="page-title">Kullanıcı Yönetimi</h1>
+            </div>
+            <div class="header-right">
+                <div class="health-indicator">
+                    <div class="pulse-dot"></div>
+                    <span>Sistem Çevrimiçi</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+            <!-- Card 1 -->
+            <div class="stat-card glass-panel">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-details">
+                    <h3>Toplam Kullanıcı</h3>
+                    <div class="stat-value" id="statTotalUsers">—</div>
+                    <div class="stat-sub">
+                        <span><i class="fas fa-database"></i> Veritabanından</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="stat-card glass-panel">
+                <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="stat-details">
+                    <h3>Admin Sayısı</h3>
+                    <div class="stat-value" id="statAdminCount">—</div>
+                    <div class="stat-sub">
+                        <span><i class="fas fa-user-shield"></i> Yöneticiler</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="stat-card glass-panel">
+                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                <div class="stat-details">
+                    <h3>Üye Sayısı</h3>
+                    <div class="stat-value" id="statMemberCount">—</div>
+                    <div class="stat-sub">
+                        <span><i class="fas fa-users"></i> Normal üyeler</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Section: Table & Filters -->
+        <main class="main-content glass-panel">
+            <div class="content-header">
+                <h2><i class="fas fa-list"></i> Kullanıcı Listesi</h2>
+                <div class="header-actions">
+                    <button class="action-btn primary-btn" id="openRoleModalBtn"><i class="fas fa-user-tag"></i> Rol Ver</button>
+                </div>
+            </div>
+
+            <div class="filters-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Kullanıcı Ara...">
+                </div>
+                <div class="filter-box">
+                    <select>
+                        <option value="">Tüm Roller</option>
+                        <option value="user">Kullanıcı</option>
+                        <option value="mod">Moderatör</option>
+                        <option value="admin">Admin</option>
+                        <option value="superadmin">Süper Admin</option>
+                    </select>
+                </div>
+                <div class="filter-box">
+                    <select>
+                        <option value="">Tüm Durumlar</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="banned">Yasaklı</option>
+                        <option value="pending">Beklemede</option>
+                    </select>
+                </div>
+                <div class="filter-box">
+                    <input type="date" title="Tarihe Göre">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Profil</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>E-Posta</th>
+                            <th>Rol</th>
+                            <th>Durum</th>
+                            <th>Son Giriş</th>
+                            <th>Kayıt Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Veriler /api/Users üzerinden JS tarafından yükleniyor -->
+                        <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-secondary)">
+                            <i class="fas fa-spinner fa-spin"></i> Kullanıcılar yükleniyor...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Bottom Section: Recent Activities -->
+        <section class="activities-section glass-panel">
+            <h2><i class="fas fa-history"></i> Son Kullanıcı Hareketleri</h2>
+            <div class="activity-list" id="activityList">
+                <!-- Activities inserted via JS -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modal for Role Assignment -->
+    <div class="modal-overlay" id="roleModal">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2>Rol Ver / Düzenle</h2>
+                <button class="close-btn" id="closeRoleModalBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Kullanıcı Seçimi</label>
+                    <select class="modal-select" id="modalUserSelect">
+                        <!-- Will be populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mevcut Rol</label>
+                    <div class="current-role" id="modalCurrentRole">-</div>
+                </div>
+                <div class="form-group">
+                    <label>Yeni Rol Seçimi</label>
+                    <select class="modal-select" id="modalNewRoleSelect">
+                        <option value="Admin">Admin</option>
+                        <option value="Uye">Üye</option>
+                        <option value="Misafir">Misafir</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea class="modal-textarea" rows="3" placeholder="Rol değişikliği nedeni..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn" id="cancelRoleModalBtn">İptal</button>
+                <button class="action-btn primary-btn" id="saveRoleBtn">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/Js/kullanici-yonetimi.js"></script>
+    <script src="/Js/auth.js"></script>
+</body>
+</html>

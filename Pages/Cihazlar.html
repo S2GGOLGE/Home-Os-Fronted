@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeOS - Cihaz Yönetimi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/Css/cihazlar.css">
+    <link rel="stylesheet" href="/Css/modal.css">
+    <link rel="icon" href="/İmages/logo.png" type="image/png">
+</head>
+
+<body>
+
+    <div id="loader-overlay">
+        <div class="loader-ring"></div>
+        <div class="loader-title">Home<span>OS</span></div>
+        <div class="loader-subtitle" id="loader-text">Sistem Bileşenleri Yükleniyor...</div>
+        <div class="loader-percentage" id="loader-percentage">0%</div>
+        <div class="loader-bar-wrap">
+            <div class="loader-bar" id="loader-bar"></div>
+        </div>
+    </div>
+
+    <div class="layout">
+
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo">HomeOS</div>
+                <div class="version">v1.4.2-stable</div>
+            </div>
+            <nav>
+                <a href="/index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Geri Dön
+                </a>
+            </nav>
+        
+            <button type="button" class="auth-action sidebar-auth-action" id="authActionBtn">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Giriş Yap</span>
+            </button>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1>Cihaz Yönetimi</h1>
+                    <p>Evindeki tüm akıllı donanımları buradan kontrol et. Durum: <span
+                            class="status online">ONLINE</span></p>
+                </div>
+                <div class="topbar-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Cihaz veya oda ara...">
+                    </div>
+                    <button class="add-btn" type="button" data-modal-open="device-modal"><i class="fas fa-plus"></i> Yeni Cihaz Ekle</button>
+                </div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>Toplam Cihaz</h3>
+                    <span class="num green">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Online Donanım</h3>
+                    <span class="num green">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Bağlantı Yok</h3>
+                    <span class="num red">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Bakım / Arıza</h3>
+                    <span class="num orange">0</span>
+                </div>
+            </section>
+
+            <section class="filter-bar">
+                <button class="filter-btn active" data-filter="all">Tümü</button>
+                <button class="filter-btn" data-filter="light">Işıklar</button>
+                <button class="filter-btn" data-filter="camera">Kameralar</button>
+                <button class="filter-btn" data-filter="sensor">Sensörler</button>
+                <button class="filter-btn" data-filter="plug">Prizler</button>
+                <button class="filter-btn" data-filter="climate">Klima</button>
+            </section>
+
+            <section class="devices-grid">
+            </section>
+        </main>
+
+        <aside class="details-panel">
+            <div class="details-header">
+                <h2><i class="fas fa-info-circle"></i> Cihaz Detayları</h2>
+            </div>
+
+            <div class="info-list">
+                <div class="info-item"><span>Konum</span><strong>-</strong></div>
+                <div class="info-item"><span>IP Adresi</span><strong>-</strong></div>
+                <div class="info-item"><span>MAC Adresi</span><strong>-</strong></div>
+                <div class="info-item"><span>Firmware</span><strong>-</strong></div>
+            </div>
+
+            <div class="resource-section">
+                <h3>KAYNAK KULLANIMI</h3>
+                <div class="resource-item">
+                    <div class="res-labels"><span>CPU Yükü</span><span>%0</span></div>
+                    <div class="res-bar">
+                        <div class="res-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <div class="res-labels"><span>RAM Bellek</span><span>0 MB</span></div>
+                    <div class="res-bar">
+                        <div class="res-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="log-section">
+                <h3>CANLI TERMİNAL LOGLARI</h3>
+                <div class="terminal-box">
+                    <p class="log-line"><span class="time">[--:--:--]</span> Cihaz seçilmedi.</p>
+                </div>
+            </div>
+
+            <button class="cmd-btn" disabled><i class="fas fa-terminal"></i> Komut Gönder</button>
+        </aside>
+
+    </div>
+
+    <div id="device-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> Yeni Cihaz Ekle</h2>
+                <button id="close-modal" class="close-btn" type="button" data-modal-close aria-label="Kapat">&times;</button>
+            </div>
+
+            <form id="add-device-form" class="modal-form">
+                <div class="form-group">
+                    <label for="device-name">Cihaz Adı</label>
+                    <input type="text" id="device-name" placeholder="Örn: Salon Lambası, Akıllı Priz" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="device-room">Konum / Oda</label>
+                    <input type="text" id="device-room" placeholder="Örn: Salon, Mutfak, Bahçe" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="device-type">Cihaz Türü</label>
+                    <select id="device-type">
+                        <option value="light">Aydınlatma / Işık</option>
+                        <option value="camera">Kamera</option>
+                        <option value="plug">Akıllı Priz / Röle</option>
+                        <option value="climate">Klima / Termostat</option>
+                        <option value="sensor">Sensör</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="device-ip">IP Adresi (Opsiyonel)</label>
+                    <input type="text" id="device-ip" placeholder="Örn: 192.168.1.150">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancel-modal" class="btn-secondary" data-modal-close>İptal Et</button>
+                    <button type="submit" class="btn-primary">Sisteme Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/Js/modal.js"></script>
+    <script src="/Js/cihazlar.js"></script>
+    <script src="/Js/Endpoint/cihazdurumguncelleme.js"></script>
+    <script src="/Js/Endpoint/CihazlarEndpoint.js"></script>
+    <script src="/Js/auth.js"></script>
+</body>
+
+</html>
