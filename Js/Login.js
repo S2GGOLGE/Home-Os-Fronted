@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Ana sayfaya yönlendir
                 setTimeout(() => {
-                    window.location.href = '/index.html';
+                    window.location.href = '../index.html';
                 }, 800);
             } else {
                 btn.innerHTML = `<i class="fas fa-times"></i><span style="font-size: 13px;">Hata: ${result.message}</span>`;

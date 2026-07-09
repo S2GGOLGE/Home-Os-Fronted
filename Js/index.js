@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            window.location.href = '/Pages/Login.html';
+            window.location.href = 'Pages/Login.html';
         });
     }
 

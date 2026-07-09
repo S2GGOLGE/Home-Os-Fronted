@@ -172,7 +172,7 @@ async function deleteAutomation(id) {
 // ─── ADD MODAL ────────────────────────────────────────
 function bindEvents() {
     const backButton = document.getElementById('backButton');
-    if (backButton) backButton.addEventListener('click', () => window.location.href = '/index.html');
+    if (backButton) backButton.addEventListener('click', () => window.location.href = '../index.html');
 
     const automationForm = document.getElementById('automationForm');
     const autoNameInput = document.getElementById('autoName');

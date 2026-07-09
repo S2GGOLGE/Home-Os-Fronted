@@ -1,3 +1,9 @@
+function getHomeOsPath(page) {
+    const inPagesDir = /\/Pages\/[^/]*$/i.test(window.location.pathname);
+    if (page === 'index.html') return inPagesDir ? '../index.html' : 'index.html';
+    return inPagesDir ? page : `Pages/${page}`;
+}
+
 (function installAuthFetchGuard() {
     if (window.__homeosAuthFetchGuardInstalled) return;
     window.__homeosAuthFetchGuardInstalled = true;
@@ -14,7 +20,7 @@
             localStorage.removeItem('homeasistan_user_role');
 
             if (!window.location.pathname.endsWith('Login.html')) {
-                window.location.href = '/Pages/Login.html';
+                window.location.href = getHomeOsPath('Login.html');
             }
         }
 
@@ -43,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Redirect unauthenticated users to login page (except login/register pages)
     if (!isLoggedIn() && !window.location.pathname.endsWith('Login.html') && !window.location.pathname.endsWith('Register.html')) {
-        window.location.href = '/Pages/Login.html';
+        window.location.href = getHomeOsPath('Login.html');
         return;
     }
 
@@ -87,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentPath.endsWith(rule.pattern)) {
             if (userLevel < rule.minLevel) {
                 alert('Bu sayfaya erişim yetkiniz bulunmamaktadır.');
-                window.location.href = '/index.html';
+                window.location.href = getHomeOsPath('index.html');
                 return;
             }
         }
@@ -164,10 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.removeItem('homeasistan_login_state');
                 localStorage.removeItem('homeasistan_user_role');
                 applyAuthUi();
-                window.location.href = '/Pages/Login.html';
+                window.location.href = getHomeOsPath('Login.html');
                return;
             }
-            window.location.href = '/Pages/Login.html';
+            window.location.href = getHomeOsPath('Login.html');
         });
     }
 
@@ -291,19 +297,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isJarvis = currentPath.endsWith('jarvis.html');
 
                 bottomNav.innerHTML = `
-                    <a href="/index.html" class="mobile-bottom-item ${isDash ? 'active' : ''}">
+                    <a href="${getHomeOsPath('index.html')}" class="mobile-bottom-item ${isDash ? 'active' : ''}">
                         <i class="fas fa-chart-pie"></i>
                         <span>Panel</span>
                     </a>
-                    <a href="/Pages/Cihazlar.html" class="mobile-bottom-item ${isDev ? 'active' : ''}">
+                    <a href="${getHomeOsPath('Cihazlar.html')}" class="mobile-bottom-item ${isDev ? 'active' : ''}">
                         <i class="fas fa-lightbulb"></i>
                         <span>Cihazlar</span>
                     </a>
-                   <a href="/Pages/Odalar.html" class="mobile-bottom-item ${isRooms ? 'active' : ''}">
+                   <a href="${getHomeOsPath('Odalar.html')}" class="mobile-bottom-item ${isRooms ? 'active' : ''}">
                         <i class="fas fa-door-open"></i>
                         <span>Odalar</span>
                     </a>
-                    <a href="/Pages/Jarvis.html" class="mobile-bottom-item ${isJarvis ? 'active' : ''}">
+                    <a href="${getHomeOsPath('Jarvis.html')}" class="mobile-bottom-item ${isJarvis ? 'active' : ''}">
                         <i class="fas fa-robot"></i>
                         <span>Jarvis</span>
                     </a>

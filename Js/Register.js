@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Login sayfasına yönlendir
                 setTimeout(() => {
-                    window.location.href = '/Pages/Login.html';
+                    window.location.href = 'Login.html';
                 }, 1000);
             } else {
                 btn.innerHTML = `<i class="fas fa-times"></i><span style="font-size: 13px;">Hata: ${result.message}</span>`;
