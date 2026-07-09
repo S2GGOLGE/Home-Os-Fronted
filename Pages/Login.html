@@ -6,6 +6,7 @@
     <title>Ev Asistanı - Giriş</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../Css/style.css">
+    <link rel="stylesheet" href="../Css/modal.css">
     <link rel="stylesheet" href="../Css/Login.css">
     <link rel="icon" href="../İmages/logo.png" type="image/png">
 </head>
@@ -51,7 +52,8 @@
                         <span class="checkmark"></span>
                         Beni Hatırla
                     </label>
-                    <a href="#" class="forgot-password">Şifremi Unuttum</a>
+                    <!-- data-modal-open → modal.js otomatik açar -->
+                    <a href="#" class="forgot-password" id="openChangePasswordModal" data-modal-open="changePasswordModal">Şifremi Değiştir</a>
                 </div>
 
                 <button type="submit" class="btn-login">
@@ -67,9 +69,81 @@
         </div>
     </div>
 
+    <!-- ── Şifre Değiştir Modal ─────────────────────────────────────────────── -->
+    <div class="modal" id="changePasswordModal" role="dialog" aria-modal="true" aria-labelledby="cpModalTitle" aria-hidden="true">
+        <div class="modal-content">
+
+            <button class="close-btn" data-modal-close aria-label="Kapat">&times;</button>
+
+            <div class="modal-header">
+                <h2 id="cpModalTitle">
+                    <i class="fas fa-key"></i> Şifre Değiştir
+                </h2>
+            </div>
+
+            <form id="cpForm" class="modal-form" novalidate>
+
+                <!-- Kullanıcı Adı -->
+                <div class="form-group">
+                    <label for="cpUsername"><i class="fas fa-user"></i> Kullanıcı Adı</label>
+                    <input type="text" id="cpUsername" placeholder="Kullanıcı adınız" autocomplete="username" required>
+                </div>
+
+                <!-- Mevcut Şifre -->
+                <div class="form-group">
+                    <label for="cpCurrentPassword"><i class="fas fa-lock"></i> Mevcut Şifre</label>
+                    <div class="password-wrap">
+                        <input type="password" id="cpCurrentPassword" placeholder="Mevcut şifreniz" autocomplete="current-password" required>
+                        <button type="button" class="pw-toggle" data-target="cpCurrentPassword" aria-label="Şifreyi göster/gizle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Yeni Şifre -->
+                <div class="form-group">
+                    <label for="cpNewPassword"><i class="fas fa-lock-open"></i> Yeni Şifre</label>
+                    <div class="password-wrap">
+                        <input type="password" id="cpNewPassword" placeholder="Yeni şifreniz" autocomplete="new-password" required>
+                        <button type="button" class="pw-toggle" data-target="cpNewPassword" aria-label="Şifreyi göster/gizle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Yeni Şifre Tekrar -->
+                <div class="form-group">
+                    <label for="cpNewPasswordRepeat"><i class="fas fa-check-double"></i> Yeni Şifre (Tekrar)</label>
+                    <div class="password-wrap">
+                        <input type="password" id="cpNewPasswordRepeat" placeholder="Yeni şifrenizi tekrar girin" autocomplete="new-password" required>
+                        <button type="button" class="pw-toggle" data-target="cpNewPasswordRepeat" aria-label="Şifreyi göster/gizle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Geri bildirim mesajı -->
+                <div class="modal-alert" id="cpAlert" aria-live="polite"></div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" data-modal-close>
+                        <i class="fas fa-times"></i> İptal
+                    </button>
+                    <button type="submit" class="btn-primary" id="cpSubmit">
+                        <span>Güncelle</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
 
     <script src="../Js/api-config.js"></script>
+    <script src="../Js/modal.js"></script>
     <script src="../Js/Endpoint/LoginEndpoint.js"></script>
+    <script src="../Js/Endpoint/UpdatePasswordEndpoint.js"></script>
     <script src="../Js/Login.js"></script>
 </body>
 </html>
