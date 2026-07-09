@@ -75,8 +75,8 @@ async function loginUser(username, password) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                username: username,
-                passwordHash: password
+                Username: username,
+                PasswordHash: password
             })
         });
 
