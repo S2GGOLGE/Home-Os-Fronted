@@ -2,19 +2,25 @@ const API_BASE_URL = getApiBaseUrl();
 
 function getApiBaseUrl() {
     const queryApiBase = new URLSearchParams(window.location.search).get('apiBase');
+
     if (queryApiBase) {
         localStorage.setItem('homeos_api_base_url', queryApiBase);
         return queryApiBase.replace(/\/$/, '');
     }
 
-    const configuredApiBase = window.HOMEOS_API_BASE_URL || localStorage.getItem('homeos_api_base_url');
+    const configuredApiBase =
+        window.HOMEOS_API_BASE_URL ||
+        localStorage.getItem('homeos_api_base_url');
+
     if (configuredApiBase) {
         return configuredApiBase.replace(/\/$/, '');
     }
 
     const liveServerPorts = ['5500', '5501', '5502'];
-    const isLiveServer = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-        && liveServerPorts.includes(window.location.port);
+
+    const isLiveServer =
+        ['localhost', '127.0.0.1'].includes(window.location.hostname) &&
+        liveServerPorts.includes(window.location.port);
 
     if (window.location.protocol === 'file:' || isLiveServer) {
         return 'https://localhost:7201/api';
@@ -23,50 +29,100 @@ function getApiBaseUrl() {
     return `${window.location.origin}/api`;
 }
 
+
 function parseApiPayload(text) {
     if (!text) return null;
 
     try {
         return JSON.parse(text);
-    } catch {
-        throw new Error('API JSON yerine HTML/metin döndürdü. Backend URL ayarını kontrol edin.');
+    }
+    catch {
+        console.error("API JSON yerine şunu döndürdü:", text);
+        throw new Error("API geçerli JSON döndürmedi.");
     }
 }
 
+
 function unwrapApiResponse(payload) {
-    if (payload && typeof payload === 'object' && 'success' in payload && 'data' in payload) {
+    if (
+        payload &&
+        typeof payload === 'object' &&
+        'success' in payload &&
+        'data' in payload
+    ) {
         return payload;
     }
 
-    return { success: true, data: payload, error: null };
+    return {
+        success: true,
+        data: payload,
+        error: null
+    };
 }
 
+
 async function loginUser(username, password) {
+
+    const url = `${API_BASE_URL}/auth/login`;
+
+    console.log("Login URL:", url);
+
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: 'POST',
+
+        const response = await fetch(url, {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                Username: username,
-                PasswordHash: password
+                username: username,
+                passwordHash: password
             })
         });
 
+
         const text = await response.text();
-        const payload = text ? unwrapApiResponse(parseApiPayload(text)) : { success: response.ok, data: null, error: null };
+
+        console.log("Status:", response.status);
+        console.log("Response:", text);
+
+
+        const payload = text
+            ? unwrapApiResponse(parseApiPayload(text))
+            : {
+                success: response.ok,
+                data: null,
+                error: null
+            };
+
 
         if (response.ok && payload.success) {
-            return { success: true, data: payload.data };
+
+            return {
+                success: true,
+                data: payload.data
+            };
+
         }
+
 
         return {
             success: false,
-            message: payload.error || payload.message || 'Giriş başarısız'
+            message:
+                payload.error ||
+                payload.message ||
+                "Giriş başarısız"
         };
-    } catch (error) {
-        console.error('Login error:', error);
-        return { success: false, message: 'Bağlantı hatası' };
+
+
+    }
+    catch (error) {
+
+        console.error("Login bağlantı hatası:", error);
+
+        return {
+            success: false,
+            message: error.message
+        };
     }
 }
