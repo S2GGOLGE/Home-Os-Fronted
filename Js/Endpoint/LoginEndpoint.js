@@ -1,6 +1,17 @@
 const API_BASE_URL = getApiBaseUrl();
 
 function getApiBaseUrl() {
+    const queryApiBase = new URLSearchParams(window.location.search).get('apiBase');
+    if (queryApiBase) {
+        localStorage.setItem('homeos_api_base_url', queryApiBase);
+        return queryApiBase.replace(/\/$/, '');
+    }
+
+    const configuredApiBase = window.HOMEOS_API_BASE_URL || localStorage.getItem('homeos_api_base_url');
+    if (configuredApiBase) {
+        return configuredApiBase.replace(/\/$/, '');
+    }
+
     const liveServerPorts = ['5500', '5501', '5502'];
     const isLiveServer = ['localhost', '127.0.0.1'].includes(window.location.hostname)
         && liveServerPorts.includes(window.location.port);
@@ -10,6 +21,16 @@ function getApiBaseUrl() {
     }
 
     return `${window.location.origin}/api`;
+}
+
+function parseApiPayload(text) {
+    if (!text) return null;
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        throw new Error('API JSON yerine HTML/metin döndürdü. Backend URL ayarını kontrol edin.');
+    }
 }
 
 function unwrapApiResponse(payload) {
@@ -34,7 +55,7 @@ async function loginUser(username, password) {
         });
 
         const text = await response.text();
-        const payload = text ? unwrapApiResponse(JSON.parse(text)) : { success: response.ok, data: null, error: null };
+        const payload = text ? unwrapApiResponse(parseApiPayload(text)) : { success: response.ok, data: null, error: null };
 
         if (response.ok && payload.success) {
             return { success: true, data: payload.data };

@@ -10,6 +10,26 @@ let currentDateRange = '';
 let signalRConnection = null;
 
 function getApiBaseUrl() {
+
+    const queryApiBase = new URLSearchParams(window.location.search).get('apiBase');
+
+    if (queryApiBase) {
+
+        localStorage.setItem('homeos_api_base_url', queryApiBase);
+
+        return queryApiBase.replace(/\/$/, '');
+
+    }
+
+
+    const configuredApiBase = window.HOMEOS_API_BASE_URL || localStorage.getItem('homeos_api_base_url');
+
+    if (configuredApiBase) {
+
+        return configuredApiBase.replace(/\/$/, '');
+
+    }
+
     const liveServerPorts = ['5500', '5501', '5502'];
     const isLiveServer = ['localhost', '127.0.0.1'].includes(window.location.hostname)
         && liveServerPorts.includes(window.location.port);
