@@ -1,176 +1,531 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    // ── Giriş Formu ───────────────────────────────────────────────────────────
 
-    const togglePassword = document.getElementById('togglePassword');
-    const password       = document.getElementById('password');
-    const loginForm      = document.getElementById('loginForm');
-    const username       = document.getElementById('username');
-    const remember       = document.getElementById('remember');
-    const rememberedUsername = localStorage.getItem('homeasistan_remembered_username');
+    const togglePassword =
+        document.getElementById("togglePassword");
 
-    if (rememberedUsername) {
-        username.value  = rememberedUsername;
-        remember.checked = true;
+
+    const password =
+        document.getElementById("password");
+
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+
+    const username =
+        document.getElementById("username");
+
+
+    const remember =
+        document.getElementById("remember");
+
+
+    const btn =
+        document.querySelector(".btn-login");
+
+
+
+
+    const rememberedUsername =
+        localStorage.getItem(
+            "homeasistan_remembered_username"
+        );
+
+
+
+    if(rememberedUsername){
+
+        username.value =
+            rememberedUsername;
+
+        remember.checked =
+            true;
+
         password.focus();
-    } else {
+
+    }
+    else{
+
         username.focus();
+
     }
 
-    // Şifre Göster / Gizle
-    togglePassword.addEventListener('click', function () {
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
-        const icon = this.querySelector('i');
-        icon.classList.toggle('fa-eye');
-        icon.classList.toggle('fa-eye-slash');
-    });
 
-    // Giriş Yap
-    loginForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
 
-        const btn             = this.querySelector('.btn-login');
-        const originalContent = btn.innerHTML;
-        const originalBg      = btn.style.background || '';
-        const usernameVal     = username.value.trim();
-        const passwordVal     = password.value;
 
-        btn.innerHTML      = '<i class="fas fa-spinner fa-spin"></i><span>Giriş Yapılıyor...</span>';
-        btn.style.pointerEvents = 'none';
 
-        try {
-            const result = await loginUser(usernameVal, passwordVal);
+    // ===============================
+    // 5 Dakika Login Block
+    // ===============================
 
-            if (result.success) {
-                const data     = result.data || {};
-                const userRole = data.role || data.Role || 'User';
 
-                const loginState = JSON.stringify({
-                    username: usernameVal,
-                    role: userRole,
-                    loginTime: new Date().toISOString()
-                });
+    const LOGIN_BLOCK_TIME =
+        5 * 60 * 1000;
 
-                localStorage.setItem('homeasistan_user_role', userRole);
 
-                if (remember.checked) {
-                    localStorage.setItem('homeasistan_remembered_username', usernameVal);
-                    localStorage.setItem('homeasistan_login_state', loginState);
-                    sessionStorage.removeItem('homeasistan_login_state');
-                } else {
-                    localStorage.removeItem('homeasistan_remembered_username');
-                    localStorage.removeItem('homeasistan_login_state');
-                    sessionStorage.setItem('homeasistan_login_state', loginState);
+
+
+    function getBlockTime(){
+
+        const value =
+            localStorage.getItem(
+                "homeos_login_block"
+            );
+
+
+        if(!value)
+            return 0;
+
+
+
+        const time =
+            Number(value) - Date.now();
+
+
+
+        if(time <= 0){
+
+            localStorage.removeItem(
+                "homeos_login_block"
+            );
+
+
+            return 0;
+
+        }
+
+
+
+        return time;
+
+    }
+
+
+
+
+
+    function startBlock(){
+
+        localStorage.setItem(
+            "homeos_login_block",
+            Date.now() + LOGIN_BLOCK_TIME
+        );
+
+    }
+
+
+
+
+
+
+
+    function updateBlockButton(){
+
+
+        const remaining =
+            getBlockTime();
+
+
+
+        if(remaining <= 0){
+
+
+            btn.disabled = false;
+
+
+            btn.style.pointerEvents =
+                "auto";
+
+
+            btn.innerHTML =
+            `
+            <span>Giriş Yap</span>
+            <i class="fas fa-arrow-right"></i>
+            `;
+
+
+            return;
+
+        }
+
+
+
+
+
+        btn.disabled = true;
+
+
+        btn.style.pointerEvents =
+            "none";
+
+
+
+        const min =
+            Math.floor(
+                remaining / 60000
+            );
+
+
+
+        const sec =
+            Math.floor(
+                (remaining % 60000) / 1000
+            );
+
+
+
+        btn.innerHTML =
+        `
+        <i class="fas fa-lock"></i>
+        <span>
+        Bekleyin ${min}:${sec
+        .toString()
+        .padStart(2,"0")}
+        </span>
+        `;
+
+    }
+
+
+
+
+
+    setInterval(
+        updateBlockButton,
+        1000
+    );
+
+
+    updateBlockButton();
+
+
+
+
+
+
+    // ===============================
+    // Şifre Göster Gizle
+    // ===============================
+
+
+    togglePassword.addEventListener(
+        "click",
+        function(){
+
+
+            const type =
+                password.type === "password"
+                ?
+                "text"
+                :
+                "password";
+
+
+            password.type =
+                type;
+
+
+
+            const icon =
+                this.querySelector("i");
+
+
+
+            icon.classList.toggle(
+                "fa-eye"
+            );
+
+
+            icon.classList.toggle(
+                "fa-eye-slash"
+            );
+
+
+        }
+    );
+
+
+
+
+
+
+
+
+    // ===============================
+    // LOGIN
+    // ===============================
+
+
+    loginForm.addEventListener(
+        "submit",
+        async(e)=>{
+
+
+            e.preventDefault();
+
+
+
+            if(getBlockTime() > 0){
+
+                updateBlockButton();
+
+                return;
+
+            }
+
+
+
+
+
+            const usernameVal =
+                username.value.trim();
+
+
+
+            const passwordVal =
+                password.value;
+
+
+
+
+
+            const oldText =
+                btn.innerHTML;
+
+
+
+
+            btn.innerHTML =
+            `
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Giriş Yapılıyor...</span>
+            `;
+
+
+
+            btn.style.pointerEvents =
+                "none";
+
+
+
+
+
+            try{
+
+
+                const result =
+                    await loginUser(
+                        usernameVal,
+                        passwordVal
+                    );
+
+
+
+
+
+
+                if(result.success){
+
+
+
+                    localStorage.removeItem(
+                        "homeos_login_block"
+                    );
+
+
+
+
+                    const data =
+                        result.data || {};
+
+
+
+
+                    const role =
+                        data.role ||
+                        "User";
+
+
+
+
+                    const loginState =
+                    JSON.stringify({
+
+                        username:
+                            usernameVal,
+
+
+                        role:
+                            role,
+
+
+                        loginTime:
+                            new Date()
+                            .toISOString()
+
+                    });
+
+
+
+
+
+
+
+                    localStorage.setItem(
+                        "homeasistan_user_role",
+                        role
+                    );
+
+
+
+
+
+                    if(remember.checked){
+
+
+                        localStorage.setItem(
+                            "homeasistan_remembered_username",
+                            usernameVal
+                        );
+
+
+                        localStorage.setItem(
+                            "homeasistan_login_state",
+                            loginState
+                        );
+
+
+                    }
+                    else{
+
+
+                        sessionStorage.setItem(
+                            "homeasistan_login_state",
+                            loginState
+                        );
+
+
+                    }
+
+
+
+
+
+
+                    btn.innerHTML =
+                    `
+                    <i class="fas fa-check"></i>
+                    <span>Başarılı!</span>
+                    `;
+
+
+
+
+                    setTimeout(()=>{
+
+
+                        window.location.href =
+                            "../index.html";
+
+
+                    },800);
+
+
+
+
                 }
 
-                btn.innerHTML      = '<i class="fas fa-check"></i><span>Başarılı!</span>';
-                btn.style.background = '#0a2e1a';
-                btn.style.color      = '#00ff88';
+                else{
 
-                setTimeout(() => { window.location.href = '../index.html'; }, 800);
 
-            } else {
-                btn.innerHTML      = `<i class="fas fa-times"></i><span style="font-size:13px">Hata: ${result.message}</span>`;
-                btn.style.background = 'var(--color-error)';
-                setTimeout(() => {
-                    btn.innerHTML        = originalContent;
-                    btn.style.background = originalBg;
-                    btn.style.pointerEvents = 'auto';
-                }, 3000);
+
+                    if(result.blocked){
+
+
+                        startBlock();
+
+                        updateBlockButton();
+
+                        return;
+
+                    }
+
+
+
+
+
+                    btn.innerHTML =
+                    `
+                    <i class="fas fa-times"></i>
+                    <span>
+                    ${result.message}
+                    </span>
+                    `;
+
+
+
+
+                    setTimeout(()=>{
+
+
+                        btn.innerHTML =
+                            oldText;
+
+
+                        btn.style.pointerEvents =
+                            "auto";
+
+
+                    },3000);
+
+
+
+                }
+
+
+
+
             }
-        } catch {
-            btn.innerHTML      = '<i class="fas fa-times"></i><span>Bağlantı Hatası</span>';
-            btn.style.background = 'var(--color-error)';
-            setTimeout(() => {
-                btn.innerHTML        = originalContent;
-                btn.style.background = originalBg;
-                btn.style.pointerEvents = 'auto';
-            }, 3000);
-        }
-    });
+            catch(error){
 
 
-    // ── Modal açılınca kullanıcı adını otomatik doldur ────────────────────────
 
-    const cpModal = document.getElementById('changePasswordModal');
-
-    cpModal.addEventListener('modal:open', () => {
-        const cpUsername = document.getElementById('cpUsername');
-        if (username.value.trim() && !cpUsername.value) {
-            cpUsername.value = username.value.trim();
-        }
-    });
+                console.error(
+                    error
+                );
 
 
-    // ── Modal içi şifre göster / gizle toggle'ları ────────────────────────────
 
-    cpModal.querySelectorAll('.pw-toggle').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const input  = document.getElementById(this.dataset.target);
-            const icon   = this.querySelector('i');
-            const hidden = input.type === 'password';
-            input.type   = hidden ? 'text' : 'password';
-            icon.classList.toggle('fa-eye',      !hidden);
-            icon.classList.toggle('fa-eye-slash', hidden);
-        });
-    });
+                btn.innerHTML =
+                `
+                <i class="fas fa-times"></i>
+                <span>Bağlantı Hatası</span>
+                `;
 
 
-    // ── Şifre Değiştir Formu ─────────────────────────────────────────────────
 
-    const cpForm   = document.getElementById('cpForm');
-    const cpAlert  = document.getElementById('cpAlert');
-    const cpSubmit = document.getElementById('cpSubmit');
+                setTimeout(()=>{
 
-    cpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
 
-        const uname       = document.getElementById('cpUsername').value.trim();
-        const current     = document.getElementById('cpCurrentPassword').value;
-        const newPw       = document.getElementById('cpNewPassword').value;
-        const newPwRepeat = document.getElementById('cpNewPasswordRepeat').value;
+                    btn.innerHTML =
+                        oldText;
 
-        // İstemci doğrulama
-        if (!uname || !current || !newPw || !newPwRepeat)
-            return showCpAlert('error', 'Tüm alanları doldurun.');
-        if (newPw !== newPwRepeat)
-            return showCpAlert('error', 'Yeni şifreler eşleşmiyor.');
-        if (current === newPw)
-            return showCpAlert('error', 'Yeni şifre mevcut şifreyle aynı olamaz.');
 
-        // Yükleniyor
-        cpSubmit.disabled  = true;
-        cpSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Güncelleniyor...</span>';
-        cpAlert.className  = 'modal-alert';
-        cpAlert.textContent = '';
+                    btn.style.pointerEvents =
+                        "auto";
 
-        try {
-            const result = await updatePassword(uname, current, newPw, newPwRepeat);
 
-            if (result.success) {
-                showCpAlert('success', '✓ Şifre başarıyla güncellendi!');
-                cpForm.reset();
-                setTimeout(() => HomeOSModal.close('changePasswordModal'), 2000);
-            } else {
-                showCpAlert('error', result.message || 'Bir hata oluştu.');
+                },3000);
+
+
+
             }
-        } catch {
-            showCpAlert('error', 'Sunucuya bağlanılamadı.');
-        } finally {
-            cpSubmit.disabled  = false;
-            cpSubmit.innerHTML = '<span>Güncelle</span><i class="fas fa-arrow-right"></i>';
+
+
+
         }
-    });
+    );
 
-    // Modal kapanınca alert temizle
-    cpModal.addEventListener('modal:close', () => {
-        cpAlert.className   = 'modal-alert';
-        cpAlert.textContent = '';
-    });
 
-    function showCpAlert(type, message) {
-        cpAlert.className   = `modal-alert modal-alert--${type}`;
-        cpAlert.textContent = message;
-    }
 });
