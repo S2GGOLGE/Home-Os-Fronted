@@ -1,6 +1,6 @@
 // =====================================================
 // HOMEOS OTOMASYONLAR.JS
-// SADECE OTOMASYON SİSTEMİ
+// SADECE OTOMASYON SAYFASI İŞLEMLERİ
 // =====================================================
 
 
@@ -8,7 +8,23 @@
 // API AYARLARI
 // =====================================================
 
-const AUTOMATION_API = '/api/automations';
+const AUTOMATION_API =
+    '/api/automations';
+
+
+// =====================================================
+// DOM ELEMENTLERİ
+// =====================================================
+
+let automationGrid = null;
+let automationForm = null;
+let automationModal = null;
+let autoNameInput = null;
+
+let loaderOverlay = null;
+let loaderText = null;
+let loaderPercentage = null;
+let loaderBar = null;
 
 
 // =====================================================
@@ -20,14 +36,72 @@ document.addEventListener(
     () => {
 
         console.log(
-            '[AUTOMATION] Otomasyonlar sistemi başlatılıyor.'
+            '[AUTOMATION] Otomasyon sistemi başlatılıyor.'
         );
 
+
+        initializeAutomationElements();
 
         initializeAutomations();
 
     }
 );
+
+
+// =====================================================
+// DOM ELEMENTLERİNİ AL
+// =====================================================
+
+function initializeAutomationElements() {
+
+    automationGrid =
+        document.querySelector(
+            '.automation-grid'
+        );
+
+
+    automationForm =
+        document.getElementById(
+            'automationForm'
+        );
+
+
+    automationModal =
+        document.getElementById(
+            'automationModal'
+        );
+
+
+    autoNameInput =
+        document.getElementById(
+            'autoName'
+        );
+
+
+    loaderOverlay =
+        document.getElementById(
+            'loader-overlay'
+        );
+
+
+    loaderText =
+        document.getElementById(
+            'loader-text'
+        );
+
+
+    loaderPercentage =
+        document.getElementById(
+            'loader-percentage'
+        );
+
+
+    loaderBar =
+        document.getElementById(
+            'loader-bar'
+        );
+
+}
 
 
 // =====================================================
@@ -38,9 +112,68 @@ async function initializeAutomations() {
 
     try {
 
-        await loadAutomations();
+        updateLoader(
+            10,
+            'Otomasyon sistemi başlatılıyor...'
+        );
+
+
+        await delay(
+            200
+        );
+
+
+        updateLoader(
+            25,
+            'API bağlantısı hazırlanıyor...'
+        );
+
+
+        await delay(
+            200
+        );
+
 
         setupAutomationEvents();
+
+
+        updateLoader(
+            40,
+            'Otomasyonlar yükleniyor...'
+        );
+
+
+        await loadAutomations();
+
+
+        updateLoader(
+            80,
+            'Otomasyon kartları hazırlanıyor...'
+        );
+
+
+        await delay(
+            200
+        );
+
+
+        updateLoader(
+            100,
+            'Otomasyonlar hazır.'
+        );
+
+
+        await delay(
+            500
+        );
+
+
+        hideLoader();
+
+
+        console.log(
+            '[AUTOMATION] Otomasyon sistemi başarıyla başlatıldı.'
+        );
 
     }
     catch (error) {
@@ -50,21 +183,171 @@ async function initializeAutomations() {
             error
         );
 
+
+        updateLoader(
+            100,
+            'Otomasyonlar yüklenirken hata oluştu.'
+        );
+
+
+        await delay(
+            1000
+        );
+
+
+        hideLoader();
+
     }
+
 }
 
 
 // =====================================================
-// OTOMASYONLARI GETİR
+// LOADER GÜNCELLE
+// =====================================================
+
+function updateLoader(
+    percentage,
+    text
+) {
+
+    const safePercentage =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(
+                    percentage
+                ) || 0
+            )
+        );
+
+
+    if (
+        loaderPercentage
+    ) {
+
+        loaderPercentage.textContent =
+            `${ safePercentage }% `;
+
+    }
+
+
+    if (
+        loaderBar
+    ) {
+
+        loaderBar.style.width =
+            `${ safePercentage }% `;
+
+    }
+
+
+    if (
+        loaderText &&
+        text
+    ) {
+
+        loaderText.textContent =
+            text;
+
+    }
+
+}
+
+
+// =====================================================
+// LOADER KAPAT
+// =====================================================
+
+function hideLoader() {
+
+    if (
+        !loaderOverlay
+    ) {
+
+        return;
+    }
+
+
+    loaderOverlay.classList.add(
+        'hidden'
+    );
+
+
+    // CSS'de .hidden tanımlı değilse
+    // doğrudan görünürlüğü kapat
+    setTimeout(
+        () => {
+
+            if (
+                loaderOverlay
+            ) {
+
+                loaderOverlay.style.display =
+                    'none';
+
+            }
+
+        },
+        600
+    );
+
+}
+
+
+// =====================================================
+// GECİKME
+// =====================================================
+
+function delay(
+    milliseconds
+) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                milliseconds
+            )
+    );
+
+}
+
+
+// =====================================================
+// OTOMASYONLARI API'DEN GETİR
 // =====================================================
 
 async function loadAutomations() {
 
     try {
 
+        if (
+            !automationGrid
+        ) {
+
+            throw new Error(
+                '.automation-grid elementi bulunamadı.'
+            );
+
+        }
+
+
         const response =
             await fetch(
-                AUTOMATION_API
+                AUTOMATION_API,
+                {
+                    method:
+                        'GET',
+
+                    headers: {
+
+                        'Accept':
+                            'application/json'
+
+                    }
+                }
             );
 
 
@@ -73,18 +356,43 @@ async function loadAutomations() {
         ) {
 
             throw new Error(
-                `Otomasyonlar alınamadı. HTTP ${response.status}`
+                `Otomasyonlar alınamadı.HTTP ${ response.status } `
             );
+
         }
 
 
-        const automations =
+        const data =
             await response.json();
+
+
+        // API farklı formatlarda
+        // dizi döndürebilir
+        const automations =
+            Array.isArray(
+                data
+            )
+                ? data
+                : (
+                    data.automations ||
+                    data.data ||
+                    data.items ||
+                    []
+                );
 
 
         renderAutomations(
             automations
         );
+
+
+        console.log(
+            '[AUTOMATION] Otomasyonlar yüklendi:',
+            automations.length
+        );
+
+
+        return automations;
 
     }
     catch (error) {
@@ -94,272 +402,423 @@ async function loadAutomations() {
             error
         );
 
+
+        renderAutomationError(
+            error
+        );
+
+
+        throw error;
+
     }
+
 }
 
 
 // =====================================================
-// OTOMASYONLARI UI'A BAS
+// OTOMASYONLARI EKRANA BAS
 // =====================================================
 
 function renderAutomations(
     automations
 ) {
 
-    const container =
-        document.getElementById(
-            'automationsContainer'
-        );
-
-
     if (
-        !container
+        !automationGrid
     ) {
 
         return;
     }
 
 
-    container.innerHTML =
+    automationGrid.innerHTML =
         '';
+
+
+    // API'den hiç otomasyon gelmezse
+    if (
+        !automations ||
+        automations.length === 0
+    ) {
+
+        renderEmptyAutomations();
+
+        return;
+
+    }
 
 
     automations.forEach(
         automation => {
 
-            const element =
-                document.createElement(
-                    'div'
+            const id =
+                automation.id ??
+                automation.automationId;
+
+
+            const name =
+                automation.name ??
+                automation.title ??
+                `Otomasyon ${ id } `;
+
+
+            const isActive =
+                Boolean(
+                    automation.isActive ??
+                    automation.active ??
+                    false
                 );
 
 
-            element.className =
-                'automation-card';
+            const card =
+                document.createElement(
+                    'button'
+                );
 
 
-            element.dataset.id =
-                automation.id;
+            card.type =
+                'button';
 
 
-            element.innerHTML = `
-
-                <div class="automation-info">
-
-                    <h3>
-                        ${escapeAutomationHtml(
-                            automation.name
-                        )}
-                    </h3>
-
-                    <p>
-                        ${escapeAutomationHtml(
-                            automation.description || ''
-                        )}
-                    </p>
-
-                </div>
+            card.className =
+                'card';
 
 
-                <div class="automation-actions">
-
-                    <button
-                        type="button"
-                        data-action="toggle"
-                        data-id="${automation.id}"
-                    >
-                        ${
-                            automation.isActive
-                                ? 'Pasifleştir'
-                                : 'Aktifleştir'
-                        }
-                    </button>
+            card.dataset.automationId =
+                id;
 
 
-                    <button
-                        type="button"
-                        data-action="edit"
-                        data-id="${automation.id}"
-                    >
-                        Düzenle
-                    </button>
+            card.innerHTML = `
+
+    < div class="card-content" >
+
+        ${
+            escapeAutomationHtml(
+                name
+            )
+}
+
+                </div >
+
+    `;
 
 
-                    <button
-                        type="button"
-                        data-action="delete"
-                        data-id="${automation.id}"
-                    >
-                        Sil
-                    </button>
-
-                </div>
-            `;
-
-
-            container.appendChild(
-                element
+            automationGrid.appendChild(
+                card
             );
+
         }
     );
+
 }
 
 
 // =====================================================
-// OTOMASYON EVENTLERİ
+// BOŞ OTOMASYON DURUMU
+// =====================================================
+
+function renderEmptyAutomations() {
+
+    if (
+        !automationGrid
+    ) {
+
+        return;
+    }
+
+
+    const emptyCard =
+        document.createElement(
+            'div'
+        );
+
+
+    emptyCard.className =
+        'automation-empty';
+
+
+    emptyCard.innerHTML = `
+
+    < div class="card-content" >
+
+        Henüz otomasyon oluşturulmamış.
+
+        </div >
+
+    `;
+
+
+    automationGrid.appendChild(
+        emptyCard
+    );
+
+}
+
+
+// =====================================================
+// OTOMASYON HATA DURUMU
+// =====================================================
+
+function renderAutomationError(
+    error
+) {
+
+    if (
+        !automationGrid
+    ) {
+
+        return;
+    }
+
+
+    automationGrid.innerHTML = `
+
+    < div class="automation-error" >
+
+            <div class="card-content">
+
+                Otomasyonlar yüklenemedi.
+
+            </div>
+
+            <button
+                type="button"
+                id="retryAutomationButton"
+            >
+                Tekrar Dene
+            </button>
+
+        </div >
+
+    `;
+
+
+    const retryButton =
+        document.getElementById(
+            'retryAutomationButton'
+        );
+
+
+    if (
+        retryButton
+    ) {
+
+        retryButton.addEventListener(
+            'click',
+            async () => {
+
+                updateLoader(
+                    40,
+                    'Otomasyonlar tekrar yükleniyor...'
+                );
+
+
+                await loadAutomations();
+
+            }
+        );
+
+    }
+
+
+    console.error(
+        '[AUTOMATION] UI hata durumu:',
+        error
+    );
+
+}
+
+
+// =====================================================
+// EVENTLERİ KUR
 // =====================================================
 
 function setupAutomationEvents() {
 
-    const container =
+    // =================================================
+    // GERI BUTONU
+    // =================================================
+
+    const backButton =
         document.getElementById(
-            'automationsContainer'
+            'backButton'
         );
 
 
     if (
-        !container
+        backButton
     ) {
 
-        return;
+        backButton.addEventListener(
+            'click',
+            () => {
+
+                window.history.back();
+
+            }
+        );
+
     }
 
 
-    container.addEventListener(
-        'click',
-        async event => {
+    // =================================================
+    // OTOMASYON KARTLARI
+    // =================================================
 
-            const button =
-                event.target.closest(
-                    '[data-action]'
+    if (
+        automationGrid
+    ) {
+
+        automationGrid.addEventListener(
+            'click',
+            event => {
+
+                const card =
+                    event.target.closest(
+                        '[data-automation-id]'
+                    );
+
+
+                if (
+                    !card
+                ) {
+
+                    return;
+                }
+
+
+                const automationId =
+                    card.dataset.automationId;
+
+
+                openAutomation(
+                    automationId
                 );
 
-
-            if (
-                !button
-            ) {
-
-                return;
             }
+        );
+
+    }
 
 
-            const action =
-                button.dataset.action;
+    // =================================================
+    // YENİ OTOMASYON FORMU
+    // =================================================
+
+    if (
+        automationForm
+    ) {
+
+        automationForm.addEventListener(
+            'submit',
+            handleAutomationCreate
+        );
+
+    }
 
 
-            const id =
-                button.dataset.id;
+    // =================================================
+    // MODAL KAPAT
+    // =================================================
 
+    document
+        .querySelectorAll(
+            '[data-modal-close]'
+        )
+        .forEach(
+            button => {
 
-            switch (
-                action
-            ) {
+                button.addEventListener(
+                    'click',
+                    closeAutomationModal
+                );
 
-                case 'toggle':
-
-                    await toggleAutomation(
-                        id
-                    );
-
-                    break;
-
-
-                case 'edit':
-
-                    editAutomation(
-                        id
-                    );
-
-                    break;
-
-
-                case 'delete':
-
-                    await deleteAutomation(
-                        id
-                    );
-
-                    break;
             }
+        );
 
-        }
-    );
 }
 
 
 // =====================================================
-// OTOMASYON AKTİF / PASİF
+// YENİ OTOMASYON OLUŞTUR
 // =====================================================
 
-async function toggleAutomation(
-    id
+async function handleAutomationCreate(
+    event
 ) {
 
-    try {
-
-        const response =
-            await fetch(
-                `${AUTOMATION_API}/${id}/toggle`,
-                {
-                    method:
-                        'PATCH'
-                }
-            );
-
-
-        if (
-            !response.ok
-        ) {
-
-            throw new Error(
-                'Otomasyon durumu değiştirilemedi.'
-            );
-        }
-
-
-        await loadAutomations();
-
-    }
-    catch (error) {
-
-        console.error(
-            '[AUTOMATION] Toggle hatası:',
-            error
-        );
-
-    }
-}
-
-
-// =====================================================
-// OTOMASYON SİL
-// =====================================================
-
-async function deleteAutomation(
-    id
-) {
-
-    const confirmed =
-        confirm(
-            'Bu otomasyonu silmek istediğinize emin misiniz?'
-        );
+    event.preventDefault();
 
 
     if (
-        !confirmed
+        !autoNameInput
     ) {
 
         return;
     }
 
 
+    const name =
+        autoNameInput.value.trim();
+
+
+    if (
+        !name
+    ) {
+
+        alert(
+            'Lütfen otomasyon adı girin.'
+        );
+
+        return;
+    }
+
+
+    const submitButton =
+        automationForm.querySelector(
+            'button[type="submit"]'
+        );
+
+
     try {
+
+        if (
+            submitButton
+        ) {
+
+            submitButton.disabled =
+                true;
+
+            submitButton.textContent =
+                'Kaydediliyor...';
+
+        }
+
 
         const response =
             await fetch(
-                `${AUTOMATION_API}/${id}`,
+                AUTOMATION_API,
                 {
                     method:
-                        'DELETE'
+                        'POST',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json',
+
+                        'Accept':
+                            'application/json'
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            {
+                                name:
+                                    name
+                            }
+                        )
                 }
             );
 
@@ -369,9 +828,21 @@ async function deleteAutomation(
         ) {
 
             throw new Error(
-                'Otomasyon silinemedi.'
+                `Otomasyon oluşturulamadı.HTTP ${ response.status } `
             );
+
         }
+
+
+        console.log(
+            '[AUTOMATION] Yeni otomasyon oluşturuldu.'
+        );
+
+
+        automationForm.reset();
+
+
+        closeAutomationModal();
 
 
         await loadAutomations();
@@ -380,30 +851,89 @@ async function deleteAutomation(
     catch (error) {
 
         console.error(
-            '[AUTOMATION] Silme hatası:',
+            '[AUTOMATION] Oluşturma hatası:',
             error
         );
 
+
+        alert(
+            'Otomasyon oluşturulurken bir hata oluştu.'
+        );
+
     }
+    finally {
+
+        if (
+            submitButton
+        ) {
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                'Kaydet';
+
+        }
+
+    }
+
 }
 
 
 // =====================================================
-// OTOMASYON DÜZENLE
+// OTOMASYON AÇ
 // =====================================================
 
-function editAutomation(
+function openAutomation(
     id
 ) {
 
     console.log(
-        '[AUTOMATION] Düzenleme:',
+        '[AUTOMATION] Otomasyon açılıyor:',
         id
     );
 
 
-    // Buraya mevcut düzenleme modalı
-    // veya form sistemi gelecek.
+    // Burada ileride otomasyon detay sayfasına
+    // veya düzenleme ekranına yönlendirme yapılabilir.
+
+
+    // Örnek:
+    // window.location.href =
+    //     `OtomasyonDetay.html ? id = ${ encodeURIComponent(id) } `;
+
+}
+
+
+// =====================================================
+// MODAL KAPAT
+// =====================================================
+
+function closeAutomationModal() {
+
+    if (
+        !automationModal
+    ) {
+
+        return;
+    }
+
+
+    automationModal.classList.remove(
+        'active'
+    );
+
+
+    automationModal.setAttribute(
+        'aria-hidden',
+        'true'
+    );
+
+
+    // modal.js farklı bir yapı kullanıyorsa
+    // kendi event sistemine müdahale etmemek için
+    // sadece temel state temizlenir.
+
 }
 
 
@@ -416,7 +946,7 @@ function escapeAutomationHtml(
 ) {
 
     return String(
-        value
+        value ?? ''
     )
     .replace(
         /&/g,
@@ -438,4 +968,5 @@ function escapeAutomationHtml(
         /'/g,
         '&#039;'
     );
+
 }
