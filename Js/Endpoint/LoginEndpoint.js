@@ -211,7 +211,6 @@ async function loginUser(
             await fetch(
                 url,
                 {
-
                     method: "POST",
 
                     headers: {
@@ -221,13 +220,11 @@ async function loginUser(
 
                     body:
                         JSON.stringify({
-
                             username:
                                 username,
 
                             passwordHash:
                                 password
-
                         })
                 }
             );
@@ -250,13 +247,65 @@ async function loginUser(
 
 
         // =================================================
-        // API RESPONSE PARSE
+        // RATE LIMIT
+        // Backend 429 durumunda düz text döndürüyor.
+        // Bu yüzden JSON parse ETMİYORUZ.
+        // =================================================
+
+        if (
+            response.status === 429
+        ) {
+
+            console.warn(
+                "[LOGIN] Rate Limit aktif."
+            );
+
+
+            return {
+
+                success: false,
+
+                blocked: true,
+
+                status: 429,
+
+                message:
+                    "Çok fazla giriş denemesi yapıldı. Lütfen 5 dakika sonra tekrar deneyin."
+
+            };
+        }
+
+
+        // =================================================
+        // RESPONSE BOŞSA
+        // =================================================
+
+        if (!text) {
+
+            return {
+
+                success:
+                    response.ok,
+
+                data: null,
+
+                message:
+                    response.ok
+                        ? "Giriş başarılı."
+                        : "Sunucudan boş yanıt alındı."
+
+            };
+        }
+
+
+        // =================================================
+        // JSON PARSE
         // =================================================
 
         let payload;
 
 
-        if (text) {
+        try {
 
             payload =
                 unwrapApiResponse(
@@ -266,37 +315,26 @@ async function loginUser(
                 );
 
         }
-        else {
+        catch (parseError) {
 
-            payload = {
+            console.error(
+                "[LOGIN] API JSON olmayan yanıt döndürdü:",
+                text
+            );
 
-                success:
-                    response.ok,
-
-                data: null,
-
-                error: null
-
-            };
-        }
-
-
-        // =================================================
-        // RATE LIMIT
-        // =================================================
-
-        if (
-            response.status === 429
-        ) {
 
             return {
 
                 success: false,
 
-                blocked: true,
+                status:
+                    response.status,
 
                 message:
-                    "Çok fazla giriş denemesi yapıldı. 5 dakika bekleyin."
+                    response.ok
+                        ? "API geçersiz bir yanıt döndürdü."
+                        : text ||
+                          "Sunucudan geçersiz yanıt alındı."
 
             };
         }
@@ -316,12 +354,7 @@ async function loginUser(
 
 
             // =================================================
-            // JWT TOKEN
-            // Backend şu formatta dönüyor:
-            //
-            // data.token
-            // data.user
-            // data.role
+            // JWT TOKEN AL
             // =================================================
 
             const token =
@@ -333,7 +366,7 @@ async function loginUser(
             if (!token) {
 
                 console.error(
-                    "[LOGIN] API başarılı döndü ancak JWT token bulunamadı.",
+                    "[LOGIN] Login başarılı fakat JWT token bulunamadı.",
                     data
                 );
 
@@ -374,6 +407,16 @@ async function loginUser(
 
 
             // =================================================
+            // ROLE
+            // =================================================
+
+            const userRole =
+                data.role ||
+                data.user?.role ||
+                "uye";
+
+
+            // =================================================
             // LOGIN STATE
             // =================================================
 
@@ -386,12 +429,10 @@ async function loginUser(
 
                 localStorage.setItem(
                     "homeasistan_user_role",
-                    data.role ||
-                    data.user?.role ||
-                    "uye"
+                    userRole
                 );
 
-                // Eski session değerlerini temizle
+
                 sessionStorage.removeItem(
                     "homeasistan_login_state"
                 );
@@ -410,9 +451,16 @@ async function loginUser(
 
                 sessionStorage.setItem(
                     "homeasistan_user_role",
-                    data.role ||
-                    data.user?.role ||
-                    "uye"
+                    userRole
+                );
+
+
+                localStorage.removeItem(
+                    "homeasistan_login_state"
+                );
+
+                localStorage.removeItem(
+                    "homeasistan_user_role"
                 );
 
             }
@@ -431,12 +479,12 @@ async function loginUser(
 
             console.log(
                 "[LOGIN] Rol:",
-                data.role
+                userRole
             );
 
 
             console.log(
-                "[LOGIN] JWT kaydedildi."
+                "[LOGIN] JWT başarıyla kaydedildi."
             );
 
 
@@ -453,9 +501,7 @@ async function loginUser(
                     null,
 
                 role:
-                    data.role ||
-                    data.user?.role ||
-                    "uye"
+                    userRole
 
             };
         }
@@ -469,10 +515,13 @@ async function loginUser(
 
             success: false,
 
+            status:
+                response.status,
+
             message:
                 payload.error ||
                 payload.message ||
-                "Giriş başarısız."
+                "Kullanıcı adı veya şifre hatalı."
 
         };
 
@@ -495,5 +544,6 @@ async function loginUser(
                 "Sunucuya bağlanılamadı."
 
         };
+
     }
 }
