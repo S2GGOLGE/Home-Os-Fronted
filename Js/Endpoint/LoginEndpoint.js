@@ -1,61 +1,74 @@
-const API_BASE_URL = getApiBaseUrl();
 
 // =====================================================
 // API BASE URL
 // =====================================================
 
+const API_BASE_URL =
+    getApiBaseUrl();
+
+
+// =====================================================
+// API URL
+// =====================================================
+
 function getApiBaseUrl() {
 
-const queryApiBase =
-    new URLSearchParams(
-        window.location.search
-    ).get("apiBase");
+    const queryApiBase =
+        new URLSearchParams(
+            window.location.search
+        ).get(
+            'apiBase'
+        );
 
 
-if (queryApiBase) {
+    if (queryApiBase) {
 
-    const normalizedUrl =
-        queryApiBase.replace(/\/$/, "");
+        const normalized =
+            queryApiBase.replace(
+                /\/$/,
+                ''
+            );
 
-    localStorage.setItem(
-        "homeos_api_base_url",
-        normalizedUrl
-    );
 
-    return normalizedUrl;
+        localStorage.setItem(
+            'homeos_api_base_url',
+            normalized
+        );
+
+
+        return normalized;
+    }
+
+
+    const configuredApiBase =
+        window.HOMEOS_API_BASE_URL ||
+        localStorage.getItem(
+            'homeos_api_base_url'
+        );
+
+
+    if (configuredApiBase) {
+
+        return configuredApiBase.replace(
+            /\/$/,
+            ''
+        );
+    }
+
+
+    if (
+        window.location.protocol === 'file:' ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1'
+    ) {
+
+        return 'https://localhost:7201/api';
+    }
+
+
+    return `${window.location.origin}/api`;
 }
 
-
-const configuredApiBase =
-    window.HOMEOS_API_BASE_URL ||
-    localStorage.getItem(
-        "homeos_api_base_url"
-    );
-
-
-if (configuredApiBase) {
-
-    return configuredApiBase.replace(
-        /\/$/,
-        ""
-    );
-}
-
-
-if (
-    window.location.protocol === "file:" ||
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-) {
-
-    return "https://localhost:7201/api";
-}
-
-
-return `${window.location.origin}/api`;
-```
-
-}
 
 // =====================================================
 // API RESPONSE PARSE
@@ -63,376 +76,329 @@ return `${window.location.origin}/api`;
 
 function parseApiPayload(text) {
 
-```
-if (!text) {
-    return null;
+    if (!text) {
+
+        return null;
+    }
+
+
+    try {
+
+        return JSON.parse(
+            text
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            '[LOGIN] API JSON hatası:',
+            text
+        );
+
+
+        throw new Error(
+            'API geçerli JSON döndürmedi.'
+        );
+    }
 }
 
-
-try {
-
-    return JSON.parse(text);
-
-}
-catch (error) {
-
-    console.error(
-        "[LOGIN] API JSON hatası:",
-        text
-    );
-
-    throw new Error(
-        "API geçerli JSON döndürmedi."
-    );
-}
-```
-
-}
 
 // =====================================================
-// API RESPONSE NORMALIZE
+// API RESPONSE UNWRAP
 // =====================================================
 
 function unwrapApiResponse(payload) {
 
-```
-if (
-    payload &&
-    typeof payload === "object" &&
-    "success" in payload &&
-    "data" in payload
-) {
+    if (
+        payload &&
+        typeof payload === 'object' &&
+        'success' in payload &&
+        'data' in payload
+    ) {
 
-    return payload;
-}
-
-
-return {
-
-    success: true,
-
-    data: payload,
-
-    error: null,
-
-    message: null
-};
-```
-
-}
-
-// =====================================================
-// JWT TOKEN KAYDET
-// =====================================================
-
-function saveLoginToken(token) {
-
-```
-if (!token) {
-
-    console.error(
-        "[LOGIN] JWT token bulunamadı."
-    );
-
-    return false;
-}
-
-
-// Ana JWT anahtarı
-localStorage.setItem(
-    "accessToken",
-    token
-);
-
-
-// Eski sistemlerle uyumluluk
-localStorage.setItem(
-    "token",
-    token
-);
-
-
-localStorage.setItem(
-    "jwt",
-    token
-);
-
-
-// Eski homeos_token sistemi
-localStorage.setItem(
-    "homeos_token",
-    token
-);
-
-
-console.log(
-    "[LOGIN] JWT token başarıyla kaydedildi."
-);
-
-
-return true;
-```
-
-}
-
-// =====================================================
-// LOGIN STATE KAYDET
-// =====================================================
-
-function saveLoginState(data) {
-
-```
-localStorage.setItem(
-    "homeasistan_login_state",
-    "true"
-);
-
-
-const role =
-    data?.user?.role ||
-    data?.role ||
-    "uye";
-
-
-localStorage.setItem(
-    "homeasistan_user_role",
-    role
-);
-
-
-console.log(
-    "[LOGIN] Login state kaydedildi."
-);
-
-
-console.log(
-    "[LOGIN] Kullanıcı rolü:",
-    role
-);
-
-
-}
-
-
-async function loginUser(
-username,
-password
-) {
-
-const url =
-    `${API_BASE_URL}/auth/login`;
-
-
-console.log(
-    "[LOGIN] Login URL:",
-    url
-);
-
-
-try {
-
-    const response =
-        await fetch(
-            url,
-            {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type":
-                        "application/json"
-                },
-
-                body:
-                    JSON.stringify({
-                        username:
-                            username,
-
-                        passwordHash:
-                            password
-                    })
-            }
-        );
-
-
-    const text =
-        await response.text();
-
-
-    console.log(
-        "[LOGIN] HTTP Status:",
-        response.status
-    );
-
-
-    console.log(
-        "[LOGIN] API Response:",
-        text
-    );
-
-
-    let rawPayload =
-        null;
-
-
-    if (text) {
-
-        rawPayload =
-            parseApiPayload(
-                text
-            );
+        return payload;
     }
 
 
-    const payload =
-        unwrapApiResponse(
-            rawPayload
+    return {
+
+        success: true,
+
+        data: payload,
+
+        error: null
+    };
+}
+
+
+// =====================================================
+// LOGIN
+// =====================================================
+
+async function loginUser(
+    username,
+    password,
+    remember = true
+) {
+
+    const url =
+        `${API_BASE_URL}/auth/login`;
+
+
+    console.log(
+        '[LOGIN] Login URL:',
+        url
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                url,
+                {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json',
+
+                        'Accept':
+                            'application/json'
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            username:
+                                username,
+
+                            passwordHash:
+                                password
+                        })
+                }
+            );
+
+
+        const text =
+            await response.text();
+
+
+        console.log(
+            '[LOGIN] Status:',
+            response.status
         );
 
 
-    // =================================================
-    // RATE LIMIT
-    // =================================================
+        console.log(
+            '[LOGIN] Response:',
+            text
+        );
 
-    if (
-        response.status === 429
-    ) {
+
+        const rawPayload =
+            text
+                ? parseApiPayload(text)
+                : null;
+
+
+        const payload =
+            unwrapApiResponse(
+                rawPayload
+            );
+
+
+        // =================================================
+        // RATE LIMIT
+        // =================================================
+
+        if (
+            response.status === 429
+        ) {
+
+            return {
+
+                success: false,
+
+                blocked: true,
+
+                message:
+                    'Çok fazla giriş denemesi yapıldı. 5 dakika bekleyin.'
+            };
+        }
+
+
+        // =================================================
+        // LOGIN BAŞARILI
+        // =================================================
+
+        if (
+            response.ok &&
+            payload.success
+        ) {
+
+            const data =
+                payload.data || {};
+
+
+            // Backend farklı isim kullanıyorsa
+            // hepsini destekle
+
+            const token =
+                data.accessToken ||
+                data.token ||
+                data.jwt;
+
+
+            if (!token) {
+
+                console.error(
+                    '[LOGIN] Backend cevap verdi ancak JWT token bulunamadı.',
+                    data
+                );
+
+
+                return {
+
+                    success: false,
+
+                    message:
+                        'Giriş başarılı görünüyor ancak JWT token alınamadı.'
+                };
+            }
+
+
+            // =================================================
+            // JWT KAYDET
+            // auth.js içindeki fonksiyon
+            // =================================================
+
+            saveAuthToken(
+                token,
+                remember
+            );
+
+
+            // =================================================
+            // LOGIN STATE
+            // =================================================
+
+            if (remember) {
+
+                localStorage.setItem(
+                    'homeasistan_login_state',
+                    'true'
+                );
+
+            }
+            else {
+
+                sessionStorage.setItem(
+                    'homeasistan_login_state',
+                    'true'
+                );
+            }
+
+
+            // =================================================
+            // ROLE
+            // =================================================
+
+            const role =
+                data.user?.role ||
+                data.role ||
+                'uye';
+
+
+            if (remember) {
+
+                localStorage.setItem(
+                    'homeasistan_user_role',
+                    role
+                );
+
+                sessionStorage.removeItem(
+                    'homeasistan_user_role'
+                );
+
+            }
+            else {
+
+                sessionStorage.setItem(
+                    'homeasistan_user_role',
+                    role
+                );
+
+                localStorage.removeItem(
+                    'homeasistan_user_role'
+                );
+            }
+
+
+            console.log(
+                '[LOGIN] Giriş başarılı.'
+            );
+
+
+            console.log(
+                '[LOGIN] JWT kaydedildi.'
+            );
+
+
+            console.log(
+                '[LOGIN] Kullanıcı rolü:',
+                role
+            );
+
+
+            return {
+
+                success: true,
+
+                data: data,
+
+                token: token,
+
+                role: role
+            };
+        }
+
+
+        // =================================================
+        // LOGIN BAŞARISIZ
+        // =================================================
 
         return {
 
             success: false,
 
-            blocked: true,
-
             message:
-                "Çok fazla giriş denemesi yapıldı. 5 dakika bekleyin."
+                payload.error ||
+                payload.message ||
+                'Kullanıcı adı veya şifre hatalı.'
         };
+
+
     }
+    catch (error) {
 
-
-    // =================================================
-    // LOGIN BAŞARILI
-    // =================================================
-
-    if (
-        response.ok &&
-        payload.success
-    ) {
-
-        const data =
-            payload.data ||
-            {};
-
-
-        // =================================================
-        // JWT TOKEN BUL
-        // =================================================
-
-        const token =
-            data.accessToken ||
-            data.token ||
-            data.jwt ||
-            rawPayload?.accessToken ||
-            rawPayload?.token ||
-            rawPayload?.jwt;
-
-
-        if (!token) {
-
-            console.error(
-                "[LOGIN] API başarılı döndü ancak JWT token bulunamadı.",
-                data
-            );
-
-
-            return {
-
-                success: false,
-
-                message:
-                    "Giriş başarılı görünüyor ancak JWT token alınamadı."
-            };
-        }
-
-
-        // =================================================
-        // JWT KAYDET
-        // =================================================
-
-        const tokenSaved =
-            saveLoginToken(
-                token
-            );
-
-
-        if (!tokenSaved) {
-
-            return {
-
-                success: false,
-
-                message:
-                    "JWT token kaydedilemedi."
-            };
-        }
-
-
-        // =================================================
-        // LOGIN STATE KAYDET
-        // =================================================
-
-        saveLoginState(
-            data
-        );
-
-
-        console.log(
-            "[LOGIN] Giriş başarılı."
+        console.error(
+            '[LOGIN] Bağlantı hatası:',
+            error
         );
 
 
         return {
 
-            success: true,
+            success: false,
 
-            data: data,
-
-            token: token
+            message:
+                error.message ||
+                'Sunucuya bağlanılamadı.'
         };
     }
-
-
-    // =================================================
-    // LOGIN BAŞARISIZ
-    // =================================================
-
-    return {
-
-        success: false,
-
-        message:
-            payload.error ||
-            payload.message ||
-            rawPayload?.message ||
-            "Giriş başarısız."
-    };
-}
-catch (error) {
-
-    console.error(
-        "[LOGIN] Bağlantı hatası:",
-        error
-    );
-
-
-    return {
-
-        success: false,
-
-        message:
-            error.message ||
-            "Sunucuya bağlanılamadı."
-    };
 }
 
-}
