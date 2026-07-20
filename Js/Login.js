@@ -215,15 +215,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             const type =
-                password.type === "password"
+                password.getAttribute("type") === "password"
                 ?
                 "text"
                 :
                 "password";
 
 
-            password.type =
-                type;
+            password.setAttribute(
+                "type",
+                type
+            );
 
 
 
@@ -247,8 +249,218 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+    // ===============================
+    // Modal pw-toggle butonları (Şifre Göster/Gizle)
+    // ===============================
+
+    document.querySelectorAll(".pw-toggle").forEach(
+        function(btn){
+            btn.addEventListener(
+                "click",
+                function(){
+                    const targetId =
+                        this.getAttribute("data-target");
+
+                    const input =
+                        document.getElementById(targetId);
+
+                    if(!input) return;
+
+                    const type =
+                        input.getAttribute("type") === "password"
+                        ?
+                        "text"
+                        :
+                        "password";
+
+                    input.setAttribute(
+                        "type",
+                        type
+                    );
+
+                    const icon =
+                        this.querySelector("i");
+
+                    if(icon){
+                        icon.classList.toggle(
+                            "fa-eye"
+                        );
+                        icon.classList.toggle(
+                            "fa-eye-slash"
+                        );
+                    }
+                }
+            );
+        }
+    );
 
 
+
+    // ===============================
+    // Şifre Değiştir Modal (cpForm)
+    // ===============================
+
+    const cpForm =
+        document.getElementById("cpForm");
+
+    if(cpForm){
+
+        cpForm.addEventListener(
+            "submit",
+            async function(e){
+
+                e.preventDefault();
+
+                const cpAlert =
+                    document.getElementById("cpAlert");
+
+                const cpSubmit =
+                    document.getElementById("cpSubmit");
+
+                const cpUsername =
+                    document.getElementById("cpUsername");
+
+                const cpCurrentPassword =
+                    document.getElementById("cpCurrentPassword");
+
+                const cpNewPassword =
+                    document.getElementById("cpNewPassword");
+
+                const cpNewPasswordRepeat =
+                    document.getElementById("cpNewPasswordRepeat");
+
+
+                // Alanları kontrol et
+                if(
+                    !cpUsername.value.trim() ||
+                    !cpCurrentPassword.value ||
+                    !cpNewPassword.value ||
+                    !cpNewPasswordRepeat.value
+                ){
+                    if(cpAlert){
+                        cpAlert.textContent =
+                            "Tüm alanları doldurunuz.";
+                        cpAlert.className =
+                            "modal-alert error";
+                    }
+                    return;
+                }
+
+
+                // Yeni şifre eşleşme kontrolü
+                if(
+                    cpNewPassword.value !==
+                    cpNewPasswordRepeat.value
+                ){
+                    if(cpAlert){
+                        cpAlert.textContent =
+                            "Yeni şifreler eşleşmiyor.";
+                        cpAlert.className =
+                            "modal-alert error";
+                    }
+                    return;
+                }
+
+
+                // Buton durumunu güncelle
+                const oldContent =
+                    cpSubmit.innerHTML;
+
+                cpSubmit.innerHTML =
+                `
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Güncelleniyor...</span>
+                `;
+
+                cpSubmit.style.pointerEvents =
+                    "none";
+
+
+                try{
+
+                    const result =
+                        await updatePassword(
+                            cpUsername.value.trim(),
+                            cpCurrentPassword.value,
+                            cpNewPassword.value,
+                            cpNewPasswordRepeat.value
+                        );
+
+
+                    if(result.success){
+
+                        if(cpAlert){
+                            cpAlert.textContent =
+                                result.message ||
+                                "Şifre başarıyla güncellendi!";
+                            cpAlert.className =
+                                "modal-alert success";
+                        }
+
+                        cpSubmit.innerHTML =
+                        `
+                        <i class="fas fa-check"></i>
+                        <span>Başarılı!</span>
+                        `;
+
+                        setTimeout(function(){
+                            if(window.HomeOSModal){
+                                window.HomeOSModal.close(
+                                    "changePasswordModal"
+                                );
+                            }
+                            cpSubmit.innerHTML =
+                                oldContent;
+                            cpSubmit.style.pointerEvents =
+                                "auto";
+                        }, 2000);
+
+                    }
+                    else{
+
+                        if(cpAlert){
+                            cpAlert.textContent =
+                                result.message ||
+                                "Şifre güncellenemedi.";
+                            cpAlert.className =
+                                "modal-alert error";
+                        }
+
+                        cpSubmit.innerHTML =
+                            oldContent;
+
+                        cpSubmit.style.pointerEvents =
+                            "auto";
+
+                    }
+
+                }
+                catch(error){
+
+                    console.error(
+                        "Şifre güncelleme hatası:",
+                        error
+                    );
+
+                    if(cpAlert){
+                        cpAlert.textContent =
+                            "Bağlantı hatası oluştu.";
+                        cpAlert.className =
+                            "modal-alert error";
+                    }
+
+                    cpSubmit.innerHTML =
+                        oldContent;
+
+                    cpSubmit.style.pointerEvents =
+                        "auto";
+
+                }
+
+            }
+        );
+
+    }
 
 
 
