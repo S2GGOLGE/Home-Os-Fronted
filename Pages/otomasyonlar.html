@@ -2,151 +2,111 @@
 <html lang="tr">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Asistan Otomasyonlar</title>
 
-    <title>
-        Home Asistan Otomasyonlar
-    </title>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../Css/otomasyonlar.css">
-
     <link rel="stylesheet" href="../Css/modal.css">
-
     <link rel="icon" href="../İmages/logo.png" type="image/png">
-
 </head>
 
-
 <body>
-
     <!-- =================================================
          LOADER
     ================================================== -->
-
     <div id="loader-overlay">
-
         <div class="loader-ring"></div>
-
         <div class="loader-title">
             Home<span>OS</span>
         </div>
-
         <div class="loader-subtitle" id="loader-text">
             Otomasyon Modülleri Yükleniyor...
         </div>
-
         <div class="loader-percentage" id="loader-percentage">
             0%
         </div>
-
         <div class="loader-bar-wrap">
-
             <div class="loader-bar" id="loader-bar"></div>
-
         </div>
-
     </div>
-
 
     <!-- =================================================
          ANA İÇERİK
     ================================================== -->
-
     <div class="container">
-
         <div class="header-container">
-
             <button class="back-btn" type="button" id="backButton">
                 &#10229; Geri
             </button>
-
 
             <h1 class="main-title">
                 Home Asistan Otomasyonlar
             </h1>
 
-
             <button class="add-btn" type="button" data-modal-open="automationModal">
                 + Yeni Otomasyon
             </button>
-
         </div>
-
 
         <!-- =================================================
-             OTOMASYONLAR
+             OTOMASYONLAR GRID
         ================================================== -->
-
-        <div class="automation-grid">
-
+        <div class="automation-grid" id="automationGrid">
             <div class="automation-loading">
-
                 Otomasyonlar yükleniyor...
-
             </div>
-
         </div>
-
     </div>
-
 
     <!-- =================================================
          YENİ OTOMASYON MODALI
     ================================================== -->
-
     <div id="automationModal" class="modal" aria-hidden="true">
-
         <div class="modal-content">
-
             <button class="close-btn" type="button" data-modal-close aria-label="Kapat">
                 &times;
             </button>
 
-
-            <h2>
-                Yeni Otomasyon Ekle
-            </h2>
-
+            <h2>Yeni Otomasyon Ekle</h2>
 
             <form id="automationForm">
-
                 <div class="form-group">
-
-                    <label for="autoName">
-                        Otomasyon Adı
-                    </label>
-
+                    <label for="autoName">Otomasyon Adı</label>
                     <input type="text" id="autoName" placeholder="Örn: Akşam Işıkları" required>
-
                 </div>
 
+                <div class="form-group">
+                    <label for="autoTriggerCondition">Tetikleyici Koşul (TRIGGER)</label>
+                    <input type="text" id="autoTriggerCondition" placeholder="Örn: Saat 20:00 Olduğunda">
+                </div>
+
+                <div class="form-group">
+                    <label for="autoActionDescription">Gerçekleştirilecek Eylem (ACTION)</label>
+                    <input type="text" id="autoActionDescription" placeholder="Örn: Salon Işıklarını Aç">
+                </div>
+
+                <div class="form-group">
+                    <label for="autoDescription">Açıklama</label>
+                    <input type="text" id="autoDescription" placeholder="Örn: Her akşam otomatik tetiklenir">
+                </div>
 
                 <button type="submit" class="submit-btn">
                     Kaydet
                 </button>
-
             </form>
-
         </div>
-
     </div>
-
 
     <!-- =================================================
          JAVASCRIPT
     ================================================== -->
-
     <script src="../Js/api-config.js"></script>
-
-    <script src="../Js/modal.js"></script>
-
-    <script src="../Js/otomasyonlar.js"></script>
-
     <script src="../Js/auth.js"></script>
-
+    <script src="../Js/modal.js"></script>
+    <script src="../Js/Endpoint/otomasyonlar.js"></script>
+    <script src="../Js/otomasyonlar.js"></script>
 </body>
 
 </html>
