@@ -548,75 +548,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-                    const data =
-                        result.data || {};
-
-
-
-
-                    const role =
-                        data.role ||
-                        "User";
-
-
-
-
-                    const loginState =
-                    JSON.stringify({
-
-                        username:
-                            usernameVal,
-
-
-                        role:
-                            role,
-
-
-                        loginTime:
-                            new Date()
-                            .toISOString()
-
-                    });
-
-
-
-
-
-
-
-                    localStorage.setItem(
-                        "homeasistan_user_role",
-                        role
-                    );
-
-
-
-
-
+                    // LoginEndpoint.js token + loginState kaydetmeyi halletti.
+                    // Sadece "remember me" için kullanıcı adını kaydet.
                     if(remember.checked){
-
 
                         localStorage.setItem(
                             "homeasistan_remembered_username",
                             usernameVal
                         );
 
+                    } else {
 
-                        localStorage.setItem(
-                            "homeasistan_login_state",
-                            loginState
+                        localStorage.removeItem(
+                            "homeasistan_remembered_username"
                         );
-
-
-                    }
-                    else{
-
-
-                        sessionStorage.setItem(
-                            "homeasistan_login_state",
-                            loginState
-                        );
-
 
                     }
 
