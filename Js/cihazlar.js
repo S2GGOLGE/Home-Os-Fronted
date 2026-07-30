@@ -243,6 +243,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ══════════════════════════════
+    // TOPBAR YENİLE VE UYARILAR BUTON KONTROLLERİ
+    // ══════════════════════════════
+    const topbarRefreshBtn = document.getElementById('topbarRefreshBtn');
+    if (topbarRefreshBtn) {
+        topbarRefreshBtn.addEventListener('click', async () => {
+            const icon = topbarRefreshBtn.querySelector('i');
+            if (icon) icon.classList.add('fa-spin');
+            logToTerminal("[Sistem] Cihaz durumları yenileniyor...");
+            if (typeof cihazlariGetir === 'function') {
+                await cihazlariGetir();
+            }
+            setTimeout(() => {
+                if (icon) icon.classList.remove('fa-spin');
+                logToTerminal("[Sistem] Cihaz listesi güncellendi.");
+            }, 600);
+        });
+    }
+
+    const topbarAlertsBtn = document.getElementById('topbarAlertsBtn');
+    if (topbarAlertsBtn) {
+        topbarAlertsBtn.addEventListener('click', () => {
+            const offlineCards = document.querySelectorAll('.device-card .badge.offline, .device-card .badge.danger');
+            logToTerminal(`[Uyarılar] Toplam ${offlineCards.length} cihaz çevrimdışı veya uyarı durumunda.`);
+            alert(`Sistem Uyarısı: Şuan ${offlineCards.length} cihaz çevrimdışı veya sorunlu durumda.`);
+        });
+    }
+
     function logToTerminal(message) {
         if (!terminalBox) return;
         const now = new Date();

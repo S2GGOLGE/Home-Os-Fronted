@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchNotifications();
     bindFilters();
     bindActions();
+
+    // Auto-refresh notifications every 10 seconds
+    setInterval(() => {
+        fetchStats();
+        fetchNotifications();
+    }, 10000);
 });
 
 // ─── LOADER ─────────────────────────────────────────

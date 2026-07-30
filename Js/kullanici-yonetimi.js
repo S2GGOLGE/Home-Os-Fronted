@@ -124,7 +124,7 @@ function getApiBaseUrl() {
                         <button class="icon-btn edit-role-btn" data-id="${user.id}" title="Rol Düzenle">
                             <i class="fas fa-user-edit"></i>
                         </button>
-                        <button class="icon-btn danger-btn" title="Sil" disabled>
+                        <button class="icon-btn danger-btn delete-user-btn" data-id="${user.id}" title="Kullanıcıyı Sil">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -137,6 +137,26 @@ function getApiBaseUrl() {
                 openModal();
                 modalUserSelect.value = user.id;
                 updateModalCurrentRole();
+            });
+
+            // Attach event listener to delete button
+            const deleteBtn = tr.querySelector('.delete-user-btn');
+            deleteBtn.addEventListener('click', async () => {
+                if (confirm(`"${user.username}" kullanıcısını silmek istediğinize emin misiniz?`)) {
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/Users/${user.id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                            alert('Kullanıcı başarıyla silindi.');
+                            await fetchUsers();
+                        } else {
+                            const err = await res.json();
+                            alert('Hata: ' + (err.message || 'Kullanıcı silinemedi.'));
+                        }
+                    } catch (e) {
+                        console.error('Kullanıcı silinirken hata:', e);
+                        alert('Bağlantı hatası oluştu.');
+                    }
+                }
             });
 
             usersTableBody.appendChild(tr);

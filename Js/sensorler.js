@@ -225,17 +225,56 @@ function renderEmpty(msg) {
         </div>`;
 }
 
-// ─── ADD SENSOR ───────────────────────────────────────
+// ─── ADD SENSOR MODAL ─────────────────────────────────
 function bindAddBtn() {
     const btn = document.getElementById('addSensorBtn');
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-        const name = prompt('Sensör Adı:');
-        if (!name) return;
-        const type = prompt('Tip (temperature/humidity/motion/door/smoke/light/co2):', 'temperature');
-        const room = prompt('Oda:');
-        addSensor({ name, type: type || 'temperature', room, value: 0, status: 'online' });
+    const modal = document.getElementById('sensor-modal');
+    const closeBtn = document.getElementById('close-sensor-modal');
+    const cancelBtn = document.getElementById('cancel-sensor-modal');
+    const form = document.getElementById('add-sensor-form');
+
+    if (!btn || !modal) return;
+
+    const openModal = () => {
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeModal = () => {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        if (form) form.reset();
+    };
+
+    btn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
     });
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('sensor-name').value.trim();
+            const type = document.getElementById('sensor-type').value;
+            const room = document.getElementById('sensor-room').value.trim();
+            const valNum = parseFloat(document.getElementById('sensor-value').value) || 0;
+
+            const dto = {
+                name: name,
+                type: type,
+                room: room,
+                value: valNum,
+                status: 'online'
+            };
+
+            const success = await addSensor(dto);
+            if (success) {
+                closeModal();
+            }
+        });
+    }
 }
 
 async function addSensor(dto) {
@@ -246,13 +285,17 @@ async function addSensor(dto) {
             body: JSON.stringify(dto)
         });
         if (res.ok) {
+            alert('Sensör başarıyla eklendi!');
             await fetchSensors();
+            return true;
         } else {
             const err = await res.json();
-            alert('Hata: ' + (err.message || 'Bilinmeyen hata'));
+            alert('Hata: ' + (err.message || 'Sensör eklenemedi.'));
+            return false;
         }
     } catch (e) {
         alert('Bağlantı hatası: ' + e.message);
+        return false;
     }
 }
 

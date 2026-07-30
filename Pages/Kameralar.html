@@ -28,9 +28,17 @@
             <i class="fas fa-arrow-left"></i> Geri Dön
         </a>
         <div class="page-title">Kamera Kontrol Merkezi</div>
-        <button class="add-header-btn" id="header-add-btn" style="display: none;">
-            <i class="fas fa-plus"></i> Kamera Ekle
-        </button>
+        <div class="header-actions" style="display:flex;gap:10px;align-items:center;">
+            <button class="add-header-btn" id="camera-refresh-btn" type="button" title="Akışları Yenile" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);">
+                <i class="fas fa-sync-alt"></i> Yenile
+            </button>
+            <button class="add-header-btn" id="camera-alerts-btn" type="button" title="Kamera Uyarıları" style="background:rgba(255,136,0,0.15);border:1px solid #ff8800;color:#ff8800;">
+                <i class="fas fa-exclamation-triangle"></i> Uyarılar
+            </button>
+            <button class="add-header-btn" id="header-add-btn" style="display: none;">
+                <i class="fas fa-plus"></i> Kamera Ekle
+            </button>
+        </div>
     </div>
 
     <!-- Empty State (Kamera Yokken Ortada Çıkacak Alan) -->

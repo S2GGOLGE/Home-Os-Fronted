@@ -45,6 +45,11 @@
         <main class="content">
             <header class="topbar">
                 <div class="topbar-left">
+                    <nav class="breadcrumb-nav" style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">
+                        <a href="../index.html" style="color:var(--accent-green);text-decoration:none;"><i class="fas fa-home"></i> Ana Sayfa</a>
+                        <span style="margin:0 6px;">&gt;</span>
+                        <span>Cihaz Yönetimi</span>
+                    </nav>
                     <h1>Cihaz Yönetimi</h1>
                     <p>Evindeki tüm akıllı donanımları buradan kontrol et. Durum: <span
                             class="status online">ONLINE</span></p>
@@ -54,6 +59,12 @@
                         <i class="fas fa-search"></i>
                         <input type="text" placeholder="Cihaz veya oda ara...">
                     </div>
+                    <button class="add-btn" type="button" id="topbarRefreshBtn" title="Sayfayı Yenile" style="background:var(--bg-panel);border:1px solid var(--border-line);color:var(--text-primary);padding:10px 14px;border-radius:10px;cursor:pointer;">
+                        <i class="fas fa-sync-alt"></i> Yenile
+                    </button>
+                    <button class="add-btn" type="button" id="topbarAlertsBtn" title="Cihaz Uyarıları" style="background:var(--bg-panel);border:1px solid var(--border-line);color:#ff8800;padding:10px 14px;border-radius:10px;cursor:pointer;">
+                        <i class="fas fa-exclamation-triangle"></i> Uyarılar
+                    </button>
                     <button class="add-btn" type="button" data-modal-open="device-modal"><i class="fas fa-plus"></i> Yeni Cihaz Ekle</button>
                 </div>
             </header>

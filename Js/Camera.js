@@ -219,6 +219,33 @@ document.addEventListener('DOMContentLoaded', () => {
      * Olay Dinleyicileri (Event Listeners) Tanımlama
      */
     const setupEventListeners = () => {
+        // Yenile ve Uyarı Butonları
+        const refreshBtn = document.getElementById('camera-refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async () => {
+                const icon = refreshBtn.querySelector('i');
+                if (icon) icon.classList.add('fa-spin');
+                showToast('Kamera akışları taranıyor ve yenileniyor...', 'info');
+                await loadCameras();
+                setTimeout(() => {
+                    if (icon) icon.classList.remove('fa-spin');
+                    showToast('Kamera akışları güncellendi.', 'success');
+                }, 600);
+            });
+        }
+
+        const alertsBtn = document.getElementById('camera-alerts-btn');
+        if (alertsBtn) {
+            alertsBtn.addEventListener('click', () => {
+                const offlineCameras = document.querySelectorAll('.camera-card .camera-status.offline');
+                if (offlineCameras.length > 0) {
+                    showToast(`Sistem Uyarısı: ${offlineCameras.length} kamera çevrimdışı / pasif durumda!`, 'warning');
+                } else {
+                    showToast('Tüm kamera akışları stabil ve aktif çalışıyor.', 'success');
+                }
+            });
+        }
+
         // Modal Açma Butonları
         headerAddBtn?.addEventListener('click', openModal);
         emptyAddBtn?.addEventListener('click', openModal);
