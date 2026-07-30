@@ -637,6 +637,43 @@ document.addEventListener(
 
             sidebarNav.hidden =
                 !loggedIn;
+
+
+            if (loggedIn) {
+
+                const navLinks =
+                    sidebarNav.querySelectorAll('a');
+
+                navLinks.forEach(link => {
+
+                    const href =
+                        link.getAttribute('href');
+
+                    if (!href) return;
+
+                    const lowerHref =
+                        href.toLowerCase();
+
+                    for (const rule of pageRules) {
+
+                        if (lowerHref.includes(rule.pattern)) {
+
+                            if (userLevel < rule.minLevel) {
+
+                                link.style.display = 'none';
+
+                            }
+
+                            break;
+
+                        }
+
+                    }
+
+                });
+
+            }
+
         }
 
 
