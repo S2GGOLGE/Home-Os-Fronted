@@ -265,9 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const topbarAlertsBtn = document.getElementById('topbarAlertsBtn');
     if (topbarAlertsBtn) {
         topbarAlertsBtn.addEventListener('click', () => {
-            const offlineCards = document.querySelectorAll('.device-card .badge.offline, .device-card .badge.danger');
-            logToTerminal(`[Uyarılar] Toplam ${offlineCards.length} cihaz çevrimdışı veya uyarı durumunda.`);
-            alert(`Sistem Uyarısı: Şuan ${offlineCards.length} cihaz çevrimdışı veya sorunlu durumda.`);
+            if (typeof window.uyarilariGoster === 'function') {
+                window.uyarilariGoster();
+            }
         });
     }
 

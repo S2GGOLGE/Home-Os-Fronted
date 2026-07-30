@@ -183,6 +183,90 @@
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- UYARILAR MODALI                                            -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="alerts-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-window" style="width: min(100%, 560px); max-height: 85vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle" style="color:#ff8800;"></i> Cihaz Uyarıları</h2>
+                <button class="close-btn" data-modal-close aria-label="Kapat">&times;</button>
+            </div>
+            <div id="alerts-summary" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px;">
+                <div style="flex:1; min-width:120px; background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.3); border-radius:10px; padding:14px; text-align:center;">
+                    <div id="alert-offline-count" style="font-size:28px; font-weight:800; color:#ff4444;">0</div>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">Çevrimdışı</div>
+                </div>
+                <div style="flex:1; min-width:120px; background:rgba(255,136,0,0.1); border:1px solid rgba(255,136,0,0.3); border-radius:10px; padding:14px; text-align:center;">
+                    <div id="alert-warning-count" style="font-size:28px; font-weight:800; color:#ff8800;">0</div>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">Uyarı</div>
+                </div>
+                <div style="flex:1; min-width:120px; background:rgba(0,255,136,0.07); border:1px solid rgba(0,255,136,0.2); border-radius:10px; padding:14px; text-align:center;">
+                    <div id="alert-online-count" style="font-size:28px; font-weight:800; color:var(--accent-green);">0</div>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">Çevrimiçi</div>
+                </div>
+            </div>
+            <div id="alerts-list" style="display:flex; flex-direction:column; gap:10px;">
+                <p style="text-align:center; color:var(--text-secondary); padding:30px;">Yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CİHAZ AYARLARI / DÜZENLEME MODALI                         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="device-settings-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-window" style="width: min(100%, 480px);">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog" style="color:var(--accent-green);"></i> Cihaz Ayarları</h2>
+                <button class="close-btn" data-modal-close aria-label="Kapat">&times;</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.15); border-radius:10px; padding:14px; margin-bottom:20px;">
+                <div id="settings-device-icon" style="width:48px; height:48px; border-radius:12px; background:rgba(0,255,136,0.12); display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--accent-green);">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <div>
+                    <div id="settings-device-name" style="font-size:16px; font-weight:700;">—</div>
+                    <div id="settings-device-type" style="font-size:12px; color:var(--text-secondary); margin-top:2px;">—</div>
+                </div>
+                <span id="settings-device-badge" class="badge" style="margin-left:auto;">—</span>
+            </div>
+            <form id="device-settings-form" class="modal-form">
+                <input type="hidden" id="settings-device-id">
+                <div class="form-group">
+                    <label for="settings-name-input">Cihaz Adı</label>
+                    <input type="text" id="settings-name-input" placeholder="Cihaz adını girin...">
+                </div>
+                <div class="form-group">
+                    <label for="settings-type-input">Cihaz Türü</label>
+                    <select id="settings-type-input">
+                        <option value="light">Aydınlatma / Işık</option>
+                        <option value="camera">Kamera</option>
+                        <option value="plug">Akıllı Priz / Röle</option>
+                        <option value="climate">Klima / Termostat</option>
+                        <option value="sensor">Sensör</option>
+                    </select>
+                </div>
+                <div style="background:var(--bg-inner,#0a200a); border:1px solid var(--border-line); border-radius:10px; padding:14px; margin-top:4px;">
+                    <div style="font-size:12px; color:var(--text-secondary); margin-bottom:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Cihaz Bilgileri</div>
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:13px;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-secondary);">Cihaz ID</span>
+                            <span id="settings-info-id" style="font-weight:600;">—</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-secondary);">Durum</span>
+                            <span id="settings-info-status" style="font-weight:600;">—</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" data-modal-close>İptal</button>
+                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="../Js/api-config.js"></script>
     <script src="../Js/modal.js"></script>
