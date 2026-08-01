@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeOS - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../Css/Dashboard.css">
+    <link rel="icon" href="../İmages/logo.png" type="image/png">
+</head>
+
+<body>
+
+    <div id="loader-overlay">
+        <div class="loader-ring"></div>
+        <div class="loader-title">Home<span>OS</span></div>
+        <div class="loader-subtitle" id="loader-text">Dashboard Yükleniyor...</div>
+        <div class="loader-percentage" id="loader-percentage">0%</div>
+        <div class="loader-bar-wrap">
+            <div class="loader-bar" id="loader-bar"></div>
+        </div>
+    </div>
+
+    <div class="layout">
+
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo">HomeOS</div>
+                <div class="version">v1.4.2-stable</div>
+            </div>
+            <nav>
+                <a href="../index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Geri Dön
+                </a>
+            </nav>
+        
+            <button type="button" class="auth-action sidebar-auth-action" id="authActionBtn">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Giriş Yap</span>
+            </button>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <nav class="breadcrumb-nav" style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">
+                        <a href="../index.html" style="color:var(--accent-green);text-decoration:none;"><i class="fas fa-home"></i> Ana Sayfa</a>
+                        <span style="margin:0 6px;">&gt;</span>
+                        <span>Dashboard</span>
+                    </nav>
+                    <h1>Dashboard</h1>
+                    <p>Sistemin genel durumunu buradan takip edebilirsiniz.</p>
+                </div>
+                <div class="topbar-right">
+                    <div class="server-time" id="serverTime">
+                        <i class="fas fa-clock"></i>
+                        <span>--:--:--</span>
+                    </div>
+                    <button class="refresh-btn" id="refreshBtn" title="Yenile">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div id="error-banner" class="error-banner hidden">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="error-message">Bağlantı hatası oluştu.</span>
+                <button class="close-error" id="closeError">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <section class="stats-grid">
+                <div class="stat-card" data-type="users">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Kullanıcı Sayısı</h3>
+                        <span class="stat-number" id="usersCount">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" data-type="devices">
+                    <div class="stat-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Cihaz Sayısı</h3>
+                        <span class="stat-number" id="devicesCount">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" data-type="rooms">
+                    <div class="stat-icon">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Oda Sayısı</h3>
+                        <span class="stat-number" id="roomsCount">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" data-type="automations">
+                    <div class="stat-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Otomasyon Sayısı</h3>
+                        <span class="stat-number" id="automationsCount">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" data-type="sensors">
+                    <div class="stat-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Sensör Sayısı</h3>
+                        <span class="stat-number" id="sensorsCount">-</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" data-type="notifications">
+                    <div class="stat-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Bildirim Sayısı</h3>
+                        <span class="stat-number" id="notificationsCount">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-grid">
+                <div class="panel jarvis-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-robot"></i> Jarvis Durumu</h2>
+                        <div class="jarvis-status" id="jarvisStatus">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Kontrol Ediliyor...</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="jarvis-info">
+                            <div class="info-item">
+                                <span class="label">Durum:</span>
+                                <span class="value" id="jarvisState">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Uyandırma Kelimesi:</span>
+                                <span class="value" id="jarvisWakeWord">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Mikrofon:</span>
+                                <span class="value" id="jarvisMicrophone">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Yanıt Süresi:</span>
+                                <span class="value" id="jarvisResponseTime">-</span>
+                            </div>
+                        </div>
+                        <div class="last-command">
+                            <h3>Son Komut</h3>
+                            <p id="lastCommand">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel system-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-server"></i> Sistem Durumu</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="system-services">
+                            <div class="service-item">
+                                <span class="service-name">Backend Servisi</span>
+                                <span class="service-badge" id="backendService">-</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name">Watchdog</span>
+                                <span class="service-badge" id="watchdogService">-</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name">SignalR</span>
+                                <span class="service-badge" id="signalrService">-</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name">Veritabanı</span>
+                                <span class="service-badge" id="databaseService">-</span>
+                            </div>
+                            <div class="service-item">
+                                <span class="service-name">MQTT</span>
+                                <span class="service-badge" id="mqttService">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel logs-panel full-width">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-terminal"></i> Son Sistem Logları</h2>
+                        <button class="clear-logs" id="clearLogs">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <div class="logs-container" id="logsContainer">
+                            <div class="log-entry loading">
+                                <span class="log-time">--:--:--</span>
+                                <span class="log-level">INFO</span>
+                                <span class="log-message">Loglar yükleniyor...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    <script src="../Js/Core/api-config.js"></script>
+    <script src="../Js/Core/auth.js"></script>
+    <script src="../Js/Core/api-client.js"></script>
+    <script src="../Js/Core/utils.js"></script>
+    <script src="../Js/Endpoint/DashboardEndpoint.js"></script>
+    <script src="../Js/UI/Dashboard.js"></script>
+</body>
+
+</html>
