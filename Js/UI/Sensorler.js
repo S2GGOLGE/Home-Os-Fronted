@@ -240,10 +240,12 @@ function bindAddBtn() {
         });
     }
 }
-
 async function addSensor(dto) {
     try {
-        await SensorsEndpoint.create(dto);`r`n        alert('Sensör başarıyla eklendi!');`r`n        await fetchSensors();`r`n        return true;
+        await SensorsEndpoint.create(dto);
+        alert('Sensör başarıyla eklendi!');
+        await fetchSensors();
+        return true;
     } catch (e) {
         alert('Bağlantı hatası: ' + e.message);
         return false;
