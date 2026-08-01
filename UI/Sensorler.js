@@ -1,0 +1,277 @@
+/* =====================================================
+   sensorler.js - Sensörler sayfası API entegrasyonu
+   Endpoint: GET /api/Sensors
+   ===================================================== */
+
+let allSensors = [];
+let refreshTimer = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    startLoader();
+    fetchSensors();
+    bindFilters();
+    bindAddBtn();
+
+    // Her 30 saniyede bir otomatik yenile
+    refreshTimer = setInterval(fetchSensors, 30000);
+});
+
+// ─── LOADER ─────────────────────────────────────────
+function startLoader() {
+    const overlay = document.getElementById('loader-overlay');
+    const bar = document.getElementById('loader-bar');
+    const pct = document.getElementById('loader-percentage');
+    const txt = document.getElementById('loader-text');
+    if (!overlay) return;
+
+    const steps = [
+        { at: 30, msg: 'Sensör ağı taranıyor...' },
+        { at: 60, msg: 'Değerler okunuyor...' },
+        { at: 85, msg: 'Veri işleniyor...' },
+        { at: 100, msg: 'Sensör tablosu hazır.' }
+    ];
+
+    let progress = 0;
+    const timer = setInterval(() => {
+        progress += Math.floor(Math.random() * 6) + 3;
+        if (progress >= 100) { progress = 100; clearInterval(timer); }
+        if (bar) bar.style.width = progress + '%';
+        if (pct) pct.textContent = progress + '%';
+        const step = steps.find(s => progress <= s.at);
+        if (step && txt) txt.textContent = step.msg;
+        if (progress >= 100) {
+            setTimeout(() => {
+                overlay.classList.add('fade-out');
+                overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+            }, 300);
+        }
+    }, 40);
+}
+
+// ─── API FETCH ────────────────────────────────────────
+async function fetchSensors() {
+    try {
+        allSensors = await SensorsEndpoint.list();
+        updateStats(allSensors);
+        renderGrid(filterSensors(allSensors));
+    } catch (err) {
+        console.error('[Sensors] Fetch hatası:', err);
+        renderEmpty('API bağlantısı kurulamadı. Sunucunun çalıştığından emin olun.');
+    }
+}
+
+// ─── STATS ────────────────────────────────────────────
+function updateStats(sensors) {
+    const total = sensors.length;
+    const online = sensors.filter(s => s.status === 'online').length;
+    const alert = sensors.filter(s => s.status === 'warning' || s.status === 'offline').length;
+
+    const temps = sensors.filter(s => s.type === 'temperature' && s.status === 'online').map(s => s.value);
+    const hums = sensors.filter(s => s.type === 'humidity' && s.status === 'online').map(s => s.value);
+
+    const avgTemp = temps.length ? (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(1) : '—';
+    const avgHum = hums.length ? (hums.reduce((a, b) => a + b, 0) / hums.length).toFixed(1) : '—';
+
+    setText('stat-total', total);
+    setText('stat-online', online);
+    setText('stat-alert', alert);
+    setText('stat-temp', temps.length ? avgTemp + '°C' : '—°C');
+    setText('stat-hum', hums.length ? avgHum + '%' : '—%');
+}
+
+// ─── FILTERS ──────────────────────────────────────────
+function bindFilters() {
+    ['searchInput', 'filterType', 'filterRoom', 'filterStatus'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => renderGrid(filterSensors(allSensors)));
+    });
+}
+
+function filterSensors(sensors) {
+    const search = val('searchInput').toLowerCase();
+    const type = val('filterType');
+    const room = val('filterRoom');
+    const status = val('filterStatus');
+
+    return sensors.filter(s => {
+        if (search && !`${s.name} ${s.room} ${s.type}`.toLowerCase().includes(search)) return false;
+        if (type && s.type !== type) return false;
+        if (room && s.room !== room) return false;
+        if (status && s.status !== status) return false;
+        return true;
+    });
+}
+
+// ─── RENDER ───────────────────────────────────────────
+const TYPE_ICONS = {
+    temperature: { icon: 'fa-thermometer-half', color: 'blue', unit: '°C', max: 50 },
+    humidity: { icon: 'fa-tint', color: 'orange', unit: '%', max: 100 },
+    motion: { icon: 'fa-running', color: 'purple', unit: '', max: 1 },
+    door: { icon: 'fa-door-open', color: 'orange', unit: '', max: 1 },
+    smoke: { icon: 'fa-smog', color: 'red', unit: 'ppm', max: 200 },
+    light: { icon: 'fa-sun', color: 'orange', unit: 'lux', max: 1000 },
+    co2: { icon: 'fa-wind', color: 'red', unit: 'ppm', max: 1000 }
+};
+
+function renderGrid(sensors) {
+    const grid = document.getElementById('sensorGrid');
+    if (!grid) return;
+
+    if (sensors.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">
+                <i class="fas fa-microchip" style="font-size:48px;opacity:0.2;display:block;margin-bottom:16px"></i>
+                <p>Sensör bulunamadı.</p>
+            </div>`;
+        return;
+    }
+
+    grid.innerHTML = sensors.map(s => buildCard(s)).join('');
+}
+
+function buildCard(s) {
+    const meta = TYPE_ICONS[s.type] || { icon: 'fa-microchip', color: 'green', unit: '', max: 100 };
+    const isAlert = s.status === 'warning' || s.status === 'offline';
+    const statusLabel = { online: 'Çevrimiçi', offline: 'Çevrimdışı', warning: 'Uyarı' }[s.status] || s.status;
+    const statusClass = s.status === 'online' ? 'online' : s.status === 'warning' ? 'warning' : 'offline';
+
+    // Progress bar width
+    const pct = meta.max > 0 ? Math.min(100, Math.max(0, (s.value / meta.max) * 100)) : 0;
+    const barClass = s.type === 'temperature' ? 'hot' : s.type === 'humidity' ? 'humid' : '';
+
+    // Display value
+    let displayVal = s.value;
+    if (s.type === 'motion' || s.type === 'door') {
+        displayVal = s.value > 0 ? 'Açık' : 'Kapalı';
+    }
+
+    const unit = s.unit || meta.unit;
+    const battery = s.batteryLevel != null
+        ? `<span><i class="fas fa-battery-three-quarters"></i> %${s.batteryLevel}</span>` : '';
+    const lastUpd = s.lastUpdated ? `<span><i class="fas fa-clock"></i> ${formatAgo(s.lastUpdated)}</span>` : '';
+
+    return `
+    <div class="sensor-card ${isAlert ? 'alert' : ''}" data-id="${s.id}" title="${s.name} - ${s.room || 'Bilinmiyor'}">
+        <div class="sensor-header">
+            <div class="sensor-icon ${isAlert ? 'red' : meta.color}">
+                <i class="fas ${meta.icon}"></i>
+            </div>
+            <span class="sensor-status-badge ${statusClass}">${statusLabel}</span>
+        </div>
+        <div>
+            <div class="sensor-name">${escHtml(s.name)}</div>
+            <div class="sensor-room"><i class="fas fa-door-open"></i> ${escHtml(s.room || 'Bilinmiyor')}</div>
+        </div>
+        <div>
+            <div class="sensor-value ${isAlert ? 'alert-val' : ''}">
+                ${typeof displayVal === 'number' ? displayVal.toLocaleString('tr-TR') : displayVal}
+                <span class="sensor-unit">${unit}</span>
+            </div>
+            <div class="sensor-bar-wrap" style="margin-top:8px">
+                <div class="sensor-bar ${barClass}" style="width:${pct}%"></div>
+            </div>
+        </div>
+        <div class="sensor-meta">
+            ${battery}
+            ${lastUpd}
+            <span><i class="fas fa-map-marker-alt"></i> ${escHtml(s.location || '-')}</span>
+        </div>
+    </div>`;
+}
+
+function renderEmpty(msg) {
+    const grid = document.getElementById('sensorGrid');
+    if (!grid) return;
+    grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">
+            <i class="fas fa-exclamation-triangle" style="font-size:48px;opacity:0.2;display:block;margin-bottom:16px"></i>
+            <p>${msg}</p>
+        </div>`;
+}
+
+// ─── ADD SENSOR MODAL ─────────────────────────────────
+function bindAddBtn() {
+    const btn = document.getElementById('addSensorBtn');
+    const modal = document.getElementById('sensor-modal');
+    const closeBtn = document.getElementById('close-sensor-modal');
+    const cancelBtn = document.getElementById('cancel-sensor-modal');
+    const form = document.getElementById('add-sensor-form');
+
+    if (!btn || !modal) return;
+
+    const openModal = () => {
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeModal = () => {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        if (form) form.reset();
+    };
+
+    btn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('sensor-name').value.trim();
+            const type = document.getElementById('sensor-type').value;
+            const room = document.getElementById('sensor-room').value.trim();
+            const valNum = parseFloat(document.getElementById('sensor-value').value) || 0;
+
+            const dto = {
+                name: name,
+                type: type,
+                room: room,
+                value: valNum,
+                status: 'online'
+            };
+
+            const success = await addSensor(dto);
+            if (success) {
+                closeModal();
+            }
+        });
+    }
+}
+
+async function addSensor(dto) {
+    try {
+        await SensorsEndpoint.create(dto);`r`n        alert('Sensör başarıyla eklendi!');`r`n        await fetchSensors();`r`n        return true;
+    } catch (e) {
+        alert('Bağlantı hatası: ' + e.message);
+        return false;
+    }
+}
+
+// ─── UTILS ────────────────────────────────────────────
+function val(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatAgo(dateStr) {
+    const d = new Date(dateStr);
+    const diffMs = Date.now() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Az önce';
+    if (diffMin < 60) return `${diffMin} dk önce`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `${diffH} saat önce`;
+    return d.toLocaleDateString('tr-TR');
+}
