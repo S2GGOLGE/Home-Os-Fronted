@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const logTerminal = document.getElementById('log-terminal');
 
     // Sistem Ayarları
-    const JARVIS_WS_URL = "ws://127.0.0.1:8082/ws/jarvis";
-    const JARVIS_API_URL = "http://127.0.0.1:8082/api/jarvis/process";
+    const JARVIS_WS_URL = null;
+    const JARVIS_API_URL = `${getApiBaseUrl()}/Jarvis/command`;
     
     let ws = null;
     let commandCount = parseInt(localStorage.getItem('jarvis_command_count') || '0', 10);
@@ -115,6 +115,14 @@ document.addEventListener('DOMContentLoaded', () => {
     //  WEBSOCKET BAĞLANTISI
     // ══════════════════════════════
     function connectWebSocket() {
+        if (!JARVIS_WS_URL) {
+            jarvisStatusBadge.textContent = "REST Modu";
+            jarvisStatusBadge.className = "badge warning";
+            jarvisStateDesc.textContent = "HomeOS API üzerinden komutlar hazır.";
+            haStatusBadge.textContent = "Bağlı";
+            haStatusBadge.className = "badge success";
+            return;
+        }
         addTerminalLog("FastAPI WebSocket sunucusuna bağlanmaya çalışılıyor...", "info");
         
         try {
@@ -234,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await JarvisEndpoint.request(JARVIS_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ command: text })
             });
             
             if (response.ok) {

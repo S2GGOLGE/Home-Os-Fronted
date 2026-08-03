@@ -149,8 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Jarvis Çekirdeği (Python API on Port 8082)
         let jarvisOk = false;
         try {
-            const res = await AnaSayfaEndpoint.request("http://localhost:8082/");
-            jarvisOk = res.ok || res.status === 404;
+            const res = await AnaSayfaEndpoint.request(`${API_BASE_URL}/Dashboard`);
+            if (res.ok) {
+                const dashboard = await res.json();
+                jarvisOk = String(dashboard.jarvisStatus || '').toLowerCase() === 'online';
+            }
         } catch (e) {
             jarvisOk = false;
         }

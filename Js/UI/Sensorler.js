@@ -240,6 +240,7 @@ function bindAddBtn() {
         });
     }
 }
+
 async function addSensor(dto) {
     try {
         await SensorsEndpoint.create(dto);
