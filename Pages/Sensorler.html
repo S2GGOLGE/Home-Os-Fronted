@@ -421,19 +421,25 @@
 
     <!-- Sensör Ekleme Modalı -->
     <div id="sensor-modal" class="modal-overlay" aria-hidden="true" style="display:none;">
-        <div class="modal-window" style="max-width:480px;background:var(--bg-panel);border:1px solid var(--border-line);border-radius:16px;padding:24px;color:var(--text-primary);">
-            <div class="modal-header" style="display:flex;justify-size:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid var(--border-line);padding-bottom:12px;">
-                <h2 style="font-size:18px;margin:0;"><i class="fas fa-microchip" style="color:var(--accent-green);"></i> Yeni Sensör Ekle</h2>
-                <button id="close-sensor-modal" type="button" class="close-btn" style="background:none;border:none;color:var(--text-secondary);font-size:24px;cursor:pointer;">&times;</button>
+        <div class="modal-window"
+            style="max-width:480px;background:var(--bg-panel);border:1px solid var(--border-line);border-radius:16px;padding:24px;color:var(--text-primary);">
+            <div class="modal-header"
+                style="display:flex;justify-size:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid var(--border-line);padding-bottom:12px;">
+                <h2 style="font-size:18px;margin:0;"><i class="fas fa-microchip" style="color:var(--accent-green);"></i>
+                    Yeni Sensör Ekle</h2>
+                <button id="close-sensor-modal" type="button" class="close-btn"
+                    style="background:none;border:none;color:var(--text-secondary);font-size:24px;cursor:pointer;">&times;</button>
             </div>
             <form id="add-sensor-form">
                 <div class="form-group" style="margin-bottom:14px;">
                     <label for="sensor-name" style="display:block;font-size:13px;margin-bottom:6px;">Sensör Adı</label>
-                    <input type="text" id="sensor-name" placeholder="Örn: Salon Sıcaklık Sensörü" required style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
+                    <input type="text" id="sensor-name" placeholder="Örn: Salon Sıcaklık Sensörü" required
+                        style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
                 </div>
                 <div class="form-group" style="margin-bottom:14px;">
                     <label for="sensor-type" style="display:block;font-size:13px;margin-bottom:6px;">Sensör Tipi</label>
-                    <select id="sensor-type" required style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
+                    <select id="sensor-type" required
+                        style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
                         <option value="temperature">Sıcaklık (°C)</option>
                         <option value="humidity">Nem (%)</option>
                         <option value="motion">Hareket</option>
@@ -445,15 +451,21 @@
                 </div>
                 <div class="form-group" style="margin-bottom:14px;">
                     <label for="sensor-room" style="display:block;font-size:13px;margin-bottom:6px;">Oda / Konum</label>
-                    <input type="text" id="sensor-room" placeholder="Örn: Salon, Mutfak" required style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
+                    <input type="text" id="sensor-room" placeholder="Örn: Salon, Mutfak" required
+                        style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
                 </div>
                 <div class="form-group" style="margin-bottom:14px;">
-                    <label for="sensor-value" style="display:block;font-size:13px;margin-bottom:6px;">Başlangıç Değeri (Opsiyonel)</label>
-                    <input type="number" step="0.1" id="sensor-value" placeholder="Örn: 24.5" value="0" style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
+                    <label for="sensor-value" style="display:block;font-size:13px;margin-bottom:6px;">Başlangıç Değeri
+                        (Opsiyonel)</label>
+                    <input type="number" step="0.1" id="sensor-value" placeholder="Örn: 24.5" value="0"
+                        style="width:100%;padding:10px;background:var(--bg-inner);border:1px solid var(--border-line);border-radius:8px;color:var(--text-primary);">
                 </div>
                 <div class="modal-actions" style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
-                    <button type="button" id="cancel-sensor-modal" style="padding:10px 16px;background:transparent;border:1px solid var(--border-line);color:var(--text-primary);border-radius:8px;cursor:pointer;">İptal</button>
-                    <button type="submit" style="padding:10px 20px;background:var(--accent-green);border:none;color:#000;font-weight:700;border-radius:8px;cursor:pointer;">Sensörü Kaydet</button>
+                    <button type="button" id="cancel-sensor-modal"
+                        style="padding:10px 16px;background:transparent;border:1px solid var(--border-line);color:var(--text-primary);border-radius:8px;cursor:pointer;">İptal</button>
+                    <button type="submit"
+                        style="padding:10px 20px;background:var(--accent-green);border:none;color:#000;font-weight:700;border-radius:8px;cursor:pointer;">Sensörü
+                        Kaydet</button>
                 </div>
             </form>
         </div>
@@ -462,6 +474,7 @@
     <script src="../Js/Core/auth.js"></script>
     <script src="../Js/Core/api-client.js"></script>
     <script src="../Js/Core/utils.js"></script>
+    <script src="../Js/Components/modal.js"></script>
     <script src="../Js/Endpoint/SensorlerEndpoint.js"></script>
     <script src="../Js/UI/Sensorler.js"></script>
 </body>

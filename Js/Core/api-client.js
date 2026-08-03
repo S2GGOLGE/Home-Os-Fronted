@@ -21,13 +21,9 @@ class ApiClient {
      * @returns {object} Headers objesi
      */
     getAuthHeaders() {
-        const token = getAuthToken();
+        // Authorization header auth.js global fetch override tarafından ekleniyor
+        // Burada tekrar eklemiyoruz (çakışmayı önlemek için)
         const headers = new Headers(this.defaultHeaders);
-        
-        if (token) {
-            headers.set('Authorization', `Bearer ${token}`);
-        }
-        
         return headers;
     }
 

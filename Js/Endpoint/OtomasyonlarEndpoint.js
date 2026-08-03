@@ -6,7 +6,21 @@
 const AUTOMATION_API = `${getApiBaseUrl()}/Automations`;
 
 async function apiGetAutomations() {
-    const response = await fetch(AUTOMATION_API);
+    const token = getAuthToken();
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(AUTOMATION_API, {
+        method: 'GET',
+        headers
+    });
+
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP ${response.status}: ${errorText || 'Otomasyonlar çekilemedi.'}`);
@@ -15,12 +29,19 @@ async function apiGetAutomations() {
 }
 
 async function apiCreateAutomation(data) {
+    const token = getAuthToken();
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(AUTOMATION_API, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
             name: data.name,
             description: data.description || '',
@@ -38,11 +59,18 @@ async function apiCreateAutomation(data) {
 }
 
 async function apiToggleAutomation(id) {
+    const token = getAuthToken();
+    const headers = {
+        'Accept': 'application/json'
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${AUTOMATION_API}/${id}/toggle`, {
         method: 'PUT',
-        headers: {
-            'Accept': 'application/json'
-        }
+        headers
     });
 
     if (!response.ok) {
@@ -53,11 +81,18 @@ async function apiToggleAutomation(id) {
 }
 
 async function apiRunAutomation(id) {
+    const token = getAuthToken();
+    const headers = {
+        'Accept': 'application/json'
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${AUTOMATION_API}/${id}/run`, {
         method: 'PUT',
-        headers: {
-            'Accept': 'application/json'
-        }
+        headers
     });
 
     if (!response.ok) {
@@ -68,11 +103,18 @@ async function apiRunAutomation(id) {
 }
 
 async function apiDeleteAutomation(id) {
+    const token = getAuthToken();
+    const headers = {
+        'Accept': 'application/json'
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${AUTOMATION_API}/${id}`, {
         method: 'DELETE',
-        headers: {
-            'Accept': 'application/json'
-        }
+        headers
     });
 
     if (!response.ok) {

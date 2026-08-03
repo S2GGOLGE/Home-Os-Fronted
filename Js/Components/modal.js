@@ -7,6 +7,7 @@
  * Modal Yöneticisi
  * Modal pencerelerini açar, kapatır ve yönetir
  */
+console.log("Modal js");
 class ModalManager {
     constructor() {
         this.modalSelector = '.modal, .modal-overlay, .modal-backdrop';

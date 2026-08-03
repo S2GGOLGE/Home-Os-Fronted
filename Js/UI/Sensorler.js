@@ -2,9 +2,20 @@
    sensorler.js - Sensörler sayfası API entegrasyonu
    Endpoint: GET /api/Sensors
    ===================================================== */
-console.log("Sensorler.js");
+console.log("Sensorler.Js Yuklendi");
 let allSensors = [];
 let refreshTimer = null;
+
+// Sabitleri fonksiyonların dışına, üst kapsama alıyoruz
+const TYPE_ICONS = {
+    temperature: { icon: 'fa-thermometer-half', color: 'blue', unit: '°C', max: 50 },
+    humidity: { icon: 'fa-tint', color: 'orange', unit: '%', max: 100 },
+    motion: { icon: 'fa-running', color: 'purple', unit: '', max: 1 },
+    door: { icon: 'fa-door-open', color: 'orange', unit: '', max: 1 },
+    smoke: { icon: 'fa-smog', color: 'red', unit: 'ppm', max: 200 },
+    light: { icon: 'fa-sun', color: 'orange', unit: 'lux', max: 1000 },
+    co2: { icon: 'fa-wind', color: 'red', unit: 'ppm', max: 1000 }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     startLoader();
@@ -52,11 +63,12 @@ function startLoader() {
 async function fetchSensors() {
     try {
         allSensors = await SensorsEndpoint.list();
+        console.log("SENSOR DATA:", allSensors);
         updateStats(allSensors);
         renderGrid(filterSensors(allSensors));
     } catch (err) {
         console.error('[Sensors] Fetch hatası:', err);
-        renderEmpty('API bağlantısı kurulamadı. Sunucunun çalıştığından emin olun.');
+        renderEmpty('API bağlantısı kurulamadı. Sunucunun açık olduğundan emin olun!');
     }
 }
 
@@ -103,26 +115,16 @@ function filterSensors(sensors) {
 }
 
 // ─── RENDER ───────────────────────────────────────────
-const TYPE_ICONS = {
-    temperature: { icon: 'fa-thermometer-half', color: 'blue', unit: '°C', max: 50 },
-    humidity: { icon: 'fa-tint', color: 'orange', unit: '%', max: 100 },
-    motion: { icon: 'fa-running', color: 'purple', unit: '', max: 1 },
-    door: { icon: 'fa-door-open', color: 'orange', unit: '', max: 1 },
-    smoke: { icon: 'fa-smog', color: 'red', unit: 'ppm', max: 200 },
-    light: { icon: 'fa-sun', color: 'orange', unit: 'lux', max: 1000 },
-    co2: { icon: 'fa-wind', color: 'red', unit: 'ppm', max: 1000 }
-};
-
 function renderGrid(sensors) {
     const grid = document.getElementById('sensorGrid');
     if (!grid) return;
 
     if (sensors.length === 0) {
         grid.innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">
-                <i class="fas fa-microchip" style="font-size:48px;opacity:0.2;display:block;margin-bottom:16px"></i>
-                <p>Sensör bulunamadı.</p>
-            </div>`;
+        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">
+            <i class="fas fa-microchip" style="font-size:48px;opacity:0.2;display:block;margin-bottom:16px"></i>
+            <p>Sensör bulunamadı.</p>
+        </div>`;
         return;
     }
 
@@ -151,42 +153,42 @@ function buildCard(s) {
     const lastUpd = s.lastUpdated ? `<span><i class="fas fa-clock"></i> ${formatAgo(s.lastUpdated)}</span>` : '';
 
     return `
-    <div class="sensor-card ${isAlert ? 'alert' : ''}" data-id="${s.id}" title="${s.name} - ${s.room || 'Bilinmiyor'}">
-        <div class="sensor-header">
-            <div class="sensor-icon ${isAlert ? 'red' : meta.color}">
-                <i class="fas ${meta.icon}"></i>
-            </div>
-            <span class="sensor-status-badge ${statusClass}">${statusLabel}</span>
+<div class="sensor-card ${isAlert ? 'alert' : ''}" data-id="${s.id}" title="${s.name} - ${s.room || 'Bilinmiyor'}">
+    <div class="sensor-header">
+        <div class="sensor-icon ${isAlert ? 'red' : meta.color}">
+            <i class="fas ${meta.icon}"></i>
         </div>
-        <div>
-            <div class="sensor-name">${escHtml(s.name)}</div>
-            <div class="sensor-room"><i class="fas fa-door-open"></i> ${escHtml(s.room || 'Bilinmiyor')}</div>
+        <span class="sensor-status-badge ${statusClass}">${statusLabel}</span>
+    </div>
+    <div>
+        <div class="sensor-name">${escHtml(s.name)}</div>
+        <div class="sensor-room"><i class="fas fa-door-open"></i> ${escHtml(s.room || 'Bilinmiyor')}</div>
+    </div>
+    <div>
+        <div class="sensor-value ${isAlert ? 'alert-val' : ''}">
+            ${typeof displayVal === 'number' ? displayVal.toLocaleString('tr-TR') : displayVal}
+            <span class="sensor-unit">${unit}</span>
         </div>
-        <div>
-            <div class="sensor-value ${isAlert ? 'alert-val' : ''}">
-                ${typeof displayVal === 'number' ? displayVal.toLocaleString('tr-TR') : displayVal}
-                <span class="sensor-unit">${unit}</span>
-            </div>
-            <div class="sensor-bar-wrap" style="margin-top:8px">
-                <div class="sensor-bar ${barClass}" style="width:${pct}%"></div>
-            </div>
+        <div class="sensor-bar-wrap" style="margin-top:8px">
+            <div class="sensor-bar ${barClass}" style="width:${pct}%"></div>
         </div>
-        <div class="sensor-meta">
-            ${battery}
-            ${lastUpd}
-            <span><i class="fas fa-map-marker-alt"></i> ${escHtml(s.location || '-')}</span>
-        </div>
-    </div>`;
+    </div>
+    <div class="sensor-meta">
+        ${battery}
+        ${lastUpd}
+        <span><i class="fas fa-map-marker-alt"></i> ${escHtml(s.location || '-')}</span>
+    </div>
+</div>`;
 }
 
 function renderEmpty(msg) {
     const grid = document.getElementById('sensorGrid');
     if (!grid) return;
     grid.innerHTML = `
-        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">
-            <i class="fas fa-exclamation-triangle" style="font-size:48px;opacity:0.2;display:block;margin-bottom:16px"></i>
-            <p>${msg}</p>
-        </div>`;
+    <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-secondary)">
+        <i class="fas fa-exclamation-triangle" style="font-size:48px;opacity:0.2;display:block;margin-bottom:16px"></i>
+        <p>${msg}</p>
+    </div>`;
 }
 
 // ─── ADD SENSOR MODAL ─────────────────────────────────
@@ -200,14 +202,15 @@ function bindAddBtn() {
     if (!btn || !modal) return;
 
     const openModal = () => {
+        modal.classList.add('show', 'active');
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
     };
 
     const closeModal = () => {
+        modal.classList.remove('show', 'active');
         modal.style.display = 'none';
         modal.setAttribute('aria-hidden', 'true');
-        if (form) form.reset();
     };
 
     btn.addEventListener('click', openModal);

@@ -1,6 +1,8 @@
 /**
  * Home Asistan - Kamera Sistemleri Yönetim Scripti
  */
+let eventListenersSetup = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Home Asistan: Kamera Kontrol Arayüzü Başlatıldı.');
 
@@ -219,6 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * Olay Dinleyicileri (Event Listeners) Tanımlama
      */
     const setupEventListeners = () => {
+        if (eventListenersSetup) return;
+        eventListenersSetup = true;
+
         // Yenile ve Uyarı Butonları
         const refreshBtn = document.getElementById('camera-refresh-btn');
         if (refreshBtn) {
@@ -279,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (!res.ok) throw new Error('Kamera eklenirken bir sunucu hatası oluştu.');
-                
+
                 closeModal();
                 showToast('Yeni kamera başarıyla eklendi.', 'success');
                 await loadCameras();
