@@ -2,7 +2,7 @@
    sensorler.js - Sensörler sayfası API entegrasyonu
    Endpoint: GET /api/Sensors
    ===================================================== */
-
+console.log("Sensorler.js");
 let allSensors = [];
 let refreshTimer = null;
 
